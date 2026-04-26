@@ -57,8 +57,8 @@ export function TaskDetail({ taskId, onClose }: TaskDetailProps) {
             Priorité
           </p>
           <span
-            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${priority.bg}`}
-            style={{ color: priority.color }}
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium"
+            style={{ color: priority.color, backgroundColor: priority.bgColor }}
           >
             {priority.label}
           </span>
