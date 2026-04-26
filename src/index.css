@@ -1,0 +1,88 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ── Design tokens ────────────────────────────────────────────────────────── */
+:root {
+  --bg:              #f8f9fa;
+  --surface:         #ffffff;
+  --surface-hover:   #f1f3f5;
+  --surface-active:  #e9ecef;
+  --border:          #e9ecef;
+  --text-primary:    #1a1a2e;
+  --text-secondary:  #495057;
+  --text-muted:      #868e96;
+  --accent:          #6366f1;
+  --accent-hover:    #4f46e5;
+}
+
+.dark {
+  --bg:              #0f0f17;
+  --surface:         #1a1a2e;
+  --surface-hover:   #1f1f35;
+  --surface-active:  #252540;
+  --border:          #2d2d4a;
+  --text-primary:    #f1f3f5;
+  --text-secondary:  #adb5bd;
+  --text-muted:      #6c757d;
+  --accent:          #818cf8;
+  --accent-hover:    #a5b4fc;
+}
+
+/* ── Base reset ───────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 14px; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+input, textarea, [contenteditable], .prose {
+  user-select: text;
+}
+
+/* ── Scrollbar ────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* ── TipTap placeholder ───────────────────────────────────────────────────── */
+.tiptap p.is-editor-empty:first-child::before {
+  color: var(--text-muted);
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+/* ── Prose (rendered rich text) ───────────────────────────────────────────── */
+.prose { color: var(--text-primary); }
+.prose p { margin-bottom: 0.5rem; }
+.prose ul, .prose ol { padding-left: 1.25rem; }
+.prose li { margin-bottom: 0.25rem; }
+.prose code {
+  background: var(--surface-hover);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+/* ── Animations ───────────────────────────────────────────────────────────── */
+@keyframes check-bounce {
+  0%, 100% { transform: scale(1); }
+  40%       { transform: scale(0.85); }
+  70%       { transform: scale(1.12); }
+}
+
+.animate-check-bounce { animation: check-bounce 0.35s ease; }
+
+/* Toggle switch helper sizes */
+.w-4\.5 { width: 1.125rem; }
+.h-4\.5 { height: 1.125rem; }
+.h-5\.5 { height: 1.375rem; }
+.translate-x-4\.5 { --tw-translate-x: 1.125rem; }
