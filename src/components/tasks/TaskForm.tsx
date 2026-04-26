@@ -142,12 +142,12 @@ export function TaskForm({ open, onClose }: TaskFormProps) {
                   key={p}
                   type="button"
                   onClick={() => setPriority(p)}
-                  className={`flex-1 py-1.5 rounded-lg text-sm font-medium transition-all border ${
-                    priority === p
-                      ? `${cfg.bg} border-current`
-                      : 'border-[var(--border)] text-[var(--text-muted)] hover:border-current'
-                  }`}
-                  style={{ color: priority === p ? cfg.color : undefined }}
+                  className="flex-1 py-1.5 rounded-lg text-sm font-medium transition-all border"
+                  style={{
+                    backgroundColor: priority === p ? cfg.bgColor : undefined,
+                    borderColor: priority === p ? cfg.color : 'var(--border)',
+                    color: priority === p ? cfg.color : 'var(--text-muted)',
+                  }}
                 >
                   {cfg.label}
                 </button>

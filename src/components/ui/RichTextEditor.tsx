@@ -1,7 +1,6 @@
 import React from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import TiptapUnderline from '@tiptap/extension-underline';
 import Placeholder from '@tiptap/extension-placeholder';
 import {
   Bold, Italic, Underline, List, ListOrdered, Code2, Strikethrough,
@@ -22,7 +21,6 @@ export function RichTextEditor({
   const editor = useEditor({
     extensions: [
       StarterKit,
-      TiptapUnderline,
       Placeholder.configure({ placeholder }),
     ],
     content,

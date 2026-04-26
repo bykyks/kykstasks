@@ -65,32 +65,12 @@ export interface Settings {
 
 export const PRIORITY_CONFIG: Record<
   Priority,
-  { label: string; color: string; bg: string; border: string }
+  { label: string; color: string; bgColor: string }
 > = {
-  low: {
-    label: 'Basse',
-    color: '#22c55e',
-    bg: 'bg-green-500/10',
-    border: 'border-green-500',
-  },
-  medium: {
-    label: 'Moyenne',
-    color: '#3b82f6',
-    bg: 'bg-blue-500/10',
-    border: 'border-blue-500',
-  },
-  high: {
-    label: 'Haute',
-    color: '#f97316',
-    bg: 'bg-orange-500/10',
-    border: 'border-orange-500',
-  },
-  urgent: {
-    label: 'Urgente',
-    color: '#ef4444',
-    bg: 'bg-red-500/10',
-    border: 'border-red-500',
-  },
+  low:    { label: 'Basse',   color: '#22c55e', bgColor: '#22c55e1a' },
+  medium: { label: 'Moyenne', color: '#3b82f6', bgColor: '#3b82f61a' },
+  high:   { label: 'Haute',   color: '#f97316', bgColor: '#f973161a' },
+  urgent: { label: 'Urgente', color: '#ef4444', bgColor: '#ef44441a' },
 };
 
 export const PROJECT_ICONS = [
