@@ -48,7 +48,6 @@ export function TaskItem({ task, draggable = false }: TaskItemProps) {
   return (
     <motion.div
       ref={setNodeRef}
-      style={style}
       {...(draggable ? { ...attributes, ...listeners } : {})}
       layout
       initial={{ opacity: 0, y: -4 }}

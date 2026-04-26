@@ -76,7 +76,7 @@ export function TopBar() {
       <Button
         variant="primary"
         size="sm"
-        onClick={openTaskForm}
+        onClick={() => openTaskForm()}
       >
         <Plus size={14} />
         Nouvelle tâche
