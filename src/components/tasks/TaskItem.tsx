@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, Tag, Repeat, ChevronRight, Trash2, Pencil } from 'lucide-react';
+import { Calendar, Tag, Repeat, Trash2, Pencil } from 'lucide-react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useStore } from '../../store';
@@ -12,9 +12,11 @@ import { cn, formatDate, isOverdue } from '../../lib/utils';
 interface TaskItemProps {
   task: Task;
   draggable?: boolean;
+  variant?: 'row' | 'card';
+  dimmed?: boolean;
 }
 
-export function TaskItem({ task, draggable = false }: TaskItemProps) {
+export function TaskItem({ task, draggable = false, variant = 'row', dimmed = false }: TaskItemProps) {
   const { toggleTask, deleteTask, selectTask, selectedTaskId, openTaskForm, tags } = useStore();
   const [completing, setCompleting] = useState(false);
   const isSelected = selectedTaskId === task.id;
@@ -46,53 +48,140 @@ export function TaskItem({ task, draggable = false }: TaskItemProps) {
   };
 
   if (isDragging) {
+    if (variant === 'card') {
+      return (
+        <div
+          ref={setNodeRef}
+          style={{ ...style, borderLeftColor: priority.color }}
+          className="rounded-[10px] border border-[var(--border)] border-l-[3px] bg-[var(--surface-active)]/40 py-3 px-3 min-h-[60px]"
+        />
+      );
+    }
     return (
       <div
         ref={setNodeRef}
-        style={{ ...style, borderLeftColor: priority.color }}
-        className="rounded-2xl border-2 border-dashed border-[var(--border)] bg-[var(--surface-active)]/40 border-l-[5px] py-4 px-5 min-h-[72px]"
+        style={style}
+        className="border-b border-[var(--border)] py-[10px] min-h-[48px] opacity-40"
       />
     );
   }
 
+  /* ── CARD variant (Kanban) ──────────────────────────────────────────────── */
+  if (variant === 'card') {
+    return (
+      <motion.div
+        ref={setNodeRef}
+        {...(draggable ? { ...attributes, ...listeners } : {})}
+        layout
+        initial={{ opacity: 0, y: -4 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, height: 0 }}
+        onClick={() => selectTask(isSelected ? null : task.id)}
+        className={cn(
+          'group flex items-start gap-3 px-3 py-3 rounded-[10px] select-none cursor-pointer',
+          'bg-[var(--surface)] border border-[var(--border)] border-l-[3px]',
+          'transition-all duration-150',
+          draggable && 'task-draggable',
+          isSelected
+            ? 'ring-1 ring-[var(--accent)]/40'
+            : 'hover:bg-[var(--surface-hover)]',
+          (task.completed || dimmed) && 'opacity-60',
+        )}
+        style={{ ...style, borderLeftColor: priority.color }}
+      >
+        <button
+          onClick={handleComplete}
+          className={cn(
+            'mt-0.5 shrink-0 w-[18px] h-[18px] rounded-full flex items-center justify-center transition-all',
+            'border-[1.5px]',
+            completing && 'animate-check-bounce',
+            task.completed
+              ? 'bg-[var(--accent)] border-[var(--accent)]'
+              : 'border-[var(--border)] hover:border-[var(--accent)]',
+          )}
+        >
+          {task.completed && (
+            <svg width="9" height="8" viewBox="0 0 10 8" fill="none">
+              <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          )}
+        </button>
+
+        <div className="flex-1 min-w-0">
+          <p className={cn(
+            'text-[13.5px] font-medium text-[var(--text-primary)] leading-snug',
+            (task.completed || dimmed) && 'line-through text-[var(--text-muted)]',
+          )}>
+            {task.title}
+          </p>
+          {taskTags.length > 0 && (
+            <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+              {taskTags.map((tag) => (
+                <Badge key={tag.id} label={tag.name} color={tag.color} />
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="flex items-center gap-1.5 shrink-0">
+          <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button
+              onClick={(e) => { e.stopPropagation(); openTaskForm(task.id); }}
+              className="p-1.5 rounded-lg hover:bg-[var(--surface-active)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+            >
+              <Pencil size={12} />
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); deleteTask(task.id); }}
+              className="p-1.5 rounded-lg hover:bg-red-500/10 text-[var(--text-muted)] hover:text-red-500 transition-colors"
+            >
+              <Trash2 size={12} />
+            </button>
+          </div>
+          <span
+            className="w-[7px] h-[7px] rounded-full shrink-0"
+            style={{ backgroundColor: priority.color }}
+          />
+        </div>
+      </motion.div>
+    );
+  }
+
+  /* ── ROW variant (default — Today, Upcoming, AllTasks, Project) ─────────── */
   return (
     <motion.div
       ref={setNodeRef}
       {...(draggable ? { ...attributes, ...listeners } : {})}
       layout
-      initial={{ opacity: 0, y: -6 }}
+      initial={{ opacity: 0, y: -4 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, height: 0 }}
       onClick={() => selectTask(isSelected ? null : task.id)}
       className={cn(
-        'group flex items-start gap-4 px-5 py-4 rounded-2xl select-none',
-        'border-2 transition-all duration-200',
-        'shadow-sm hover:shadow-md',
+        'group flex items-center gap-3 py-[10px] select-none cursor-pointer',
+        'transition-colors duration-150',
         draggable && 'task-draggable',
         isSelected
-          ? 'bg-[var(--surface-active)] border-[var(--accent)]/60'
-          : 'bg-[var(--surface)] border-[var(--border)] hover:border-[var(--accent)]/30 hover:bg-[var(--surface-hover)]',
-        task.completed && 'opacity-50',
-        'border-l-[5px]',
+          ? 'bg-[var(--surface-active)]/50 rounded-lg px-2 -mx-2'
+          : 'hover:bg-[var(--bg)] rounded-lg px-2 -mx-2',
+        task.completed && 'opacity-[0.42]',
       )}
-      style={{
-        ...style,
-        borderLeftColor: priority.color,
-      }}
+      style={style}
     >
       {/* Checkbox */}
       <button
         onClick={handleComplete}
         className={cn(
-          'mt-0.5 shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all',
+          'shrink-0 w-[18px] h-[18px] rounded-full flex items-center justify-center transition-all',
+          'border-[1.5px]',
           completing && 'animate-check-bounce',
           task.completed
             ? 'bg-[var(--accent)] border-[var(--accent)]'
-            : 'border-[var(--border)] hover:border-[var(--accent)] hover:bg-[var(--surface-active)]',
+            : 'border-[var(--border)] hover:border-[var(--accent)]',
         )}
       >
         {task.completed && (
-          <svg width="11" height="9" viewBox="0 0 10 8" fill="none">
+          <svg width="9" height="8" viewBox="0 0 10 8" fill="none">
             <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         )}
@@ -100,60 +189,68 @@ export function TaskItem({ task, draggable = false }: TaskItemProps) {
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <p
-          className={cn(
-            'text-base font-semibold text-[var(--text-primary)] truncate leading-snug',
-            task.completed && 'line-through text-[var(--text-muted)]',
-          )}
-        >
+        <p className={cn(
+          'text-[14.5px] font-medium text-[var(--text-primary)] truncate leading-snug tracking-[-0.1px]',
+          task.completed && 'line-through text-[var(--text-muted)]',
+        )}>
           {task.title}
         </p>
-
-        <div className="flex items-center gap-2.5 mt-2 flex-wrap">
+        <div className="flex items-center gap-2 mt-1 flex-wrap">
           {task.due_date && (
-            <span
-              className={cn(
-                'flex items-center gap-1.5 text-xs font-medium',
-                overdue ? 'text-red-500' : 'text-[var(--text-muted)]',
-              )}
-            >
-              <Calendar size={12} />
+            <span className={cn(
+              'flex items-center gap-1 text-[11.5px] font-medium',
+              overdue ? 'text-red-500' : 'text-[var(--text-muted)]',
+            )}>
+              <Calendar size={11} />
               {formatDate(task.due_date)}
               {task.due_time && ` · ${task.due_time}`}
             </span>
           )}
           {task.recurrence !== 'none' && (
-            <span className="flex items-center gap-1.5 text-xs font-medium text-[var(--text-muted)]">
-              <Repeat size={12} />
+            <span className="flex items-center gap-1 text-[11.5px] font-medium text-[var(--text-muted)]">
+              <Repeat size={11} />
               {task.recurrence}
             </span>
           )}
           {taskTags.map((tag) => (
-            <Badge key={tag.id} label={tag.name} color={tag.color} />
+            <span
+              key={tag.id}
+              className="text-[11.5px] font-medium text-[var(--text-muted)] bg-[var(--tag-bg)] rounded px-[7px] py-[1px]"
+            >
+              {tag.name}
+            </span>
           ))}
           {task.subtasks.length > 0 && (
-            <span className="text-xs font-medium text-[var(--text-muted)]">
+            <span className="text-[11.5px] font-medium text-[var(--text-muted)]">
               {doneSubtasks}/{task.subtasks.length} sous-tâche{task.subtasks.length > 1 ? 's' : ''}
             </span>
           )}
         </div>
       </div>
 
-      {/* Actions */}
-      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-        <button
-          onClick={(e) => { e.stopPropagation(); openTaskForm(task.id); }}
-          className="p-2 rounded-xl hover:bg-[var(--surface-active)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
-        >
-          <Pencil size={14} />
-        </button>
-        <button
-          onClick={(e) => { e.stopPropagation(); deleteTask(task.id); }}
-          className="p-2 rounded-xl hover:bg-red-500/10 text-[var(--text-muted)] hover:text-red-500 transition-colors"
-        >
-          <Trash2 size={14} />
-        </button>
-        <ChevronRight size={16} className="text-[var(--text-muted)] ml-0.5" />
+      {/* Right side: time + priority dot + hover actions */}
+      <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button
+            onClick={(e) => { e.stopPropagation(); openTaskForm(task.id); }}
+            className="p-1.5 rounded-lg hover:bg-[var(--surface-active)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+          >
+            <Pencil size={13} />
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); deleteTask(task.id); }}
+            className="p-1.5 rounded-lg hover:bg-red-500/10 text-[var(--text-muted)] hover:text-red-500 transition-colors"
+          >
+            <Trash2 size={13} />
+          </button>
+        </div>
+        {task.due_time && !task.due_date && (
+          <span className="text-[12px] font-medium text-[var(--text-muted)]">{task.due_time}</span>
+        )}
+        <span
+          className="w-[7px] h-[7px] rounded-full shrink-0"
+          style={{ backgroundColor: priority.color }}
+        />
       </div>
     </motion.div>
   );

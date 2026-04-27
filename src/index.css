@@ -4,29 +4,35 @@
 
 /* ── Design tokens ────────────────────────────────────────────────────────── */
 :root {
-  --bg:              #FFFBF5;
+  --bg:              #FAFAF8;
   --surface:         #FFFFFF;
-  --surface-hover:   #FFF8EC;
-  --surface-active:  #FEF3C7;
-  --border:          #EDE3D0;
-  --text-primary:    #1C1917;
-  --text-secondary:  #57534E;
-  --text-muted:      #A8A29E;
-  --accent:          #F59E0B;
-  --accent-hover:    #D97706;
+  --surface-hover:   #F3F1EC;
+  --surface-active:  #EEF1FE;
+  --border:          #EEEBE5;
+  --text-primary:    #1A1917;
+  --text-secondary:  #6B6560;
+  --text-muted:      #AAA49E;
+  --accent:          #4F6EF7;
+  --accent-hover:    #3D5CE5;
+  --tag-bg:          #EEEAE3;
+  --sidebar-bg:      #F3F1EC;
+  --sidebar-border:  #E8E4DC;
 }
 
 .dark {
-  --bg:              #1C1410;
-  --surface:         #251C14;
-  --surface-hover:   #2E2218;
-  --surface-active:  #3D2E1E;
-  --border:          #3D2E1E;
-  --text-primary:    #FEF3C7;
-  --text-secondary:  #D6C8B0;
-  --text-muted:      #78716C;
-  --accent:          #FBBF24;
-  --accent-hover:    #F59E0B;
+  --bg:              #18181B;
+  --surface:         #1F1F23;
+  --surface-hover:   #27272C;
+  --surface-active:  #2D2D35;
+  --border:          #2E2E36;
+  --text-primary:    #F4F3F0;
+  --text-secondary:  #9D9A94;
+  --text-muted:      #6B6860;
+  --accent:          #6B84F8;
+  --accent-hover:    #7D93F9;
+  --tag-bg:          #27272C;
+  --sidebar-bg:      #1C1C20;
+  --sidebar-border:  #2A2A30;
 }
 
 /* ── Base reset ───────────────────────────────────────────────────────────── */
@@ -35,7 +41,7 @@
 html { font-size: 16px; }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+  font-family: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background: var(--bg);
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
@@ -92,7 +98,6 @@ input, textarea, [contenteditable], .prose {
 .task-draggable { cursor: grab; }
 .task-draggable:active { cursor: grabbing; }
 
-/* Overlay flottant qui suit le curseur */
 .drag-overlay {
   cursor: grabbing;
   transform: rotate(1.5deg) scale(1.03);

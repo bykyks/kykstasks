@@ -21,14 +21,14 @@ export default {
           hover: "var(--accent-hover)",
         },
         priority: {
-          low: "#22c55e",
-          medium: "#3b82f6",
+          low: "#9CA3AF",
+          medium: "#EAB308",
           high: "#f97316",
           urgent: "#ef4444",
         },
       },
       fontFamily: {
-        sans: ["-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"],
+        sans: ['"DM Sans"', "-apple-system", "BlinkMacSystemFont", "Segoe UI", "sans-serif"],
       },
       animation: {
         "check-bounce": "check-bounce 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both",

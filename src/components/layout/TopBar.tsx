@@ -35,7 +35,7 @@ function ThemeToggle() {
 
   return (
     <Button variant="ghost" size="icon" onClick={cycle} title={`Thème : ${settings.theme}`}>
-      <Icon size={16} />
+      <Icon size={15} />
     </Button>
   );
 }
@@ -48,18 +48,18 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
   const { activeView, searchQuery, setSearchQuery, setView, openTaskForm } = useStore();
 
   return (
-    <header className="flex items-center gap-3 px-5 md:px-6 h-16 border-b border-[var(--border)] shrink-0 bg-[var(--surface)]">
+    <header className="flex items-center gap-3 px-5 md:px-8 h-14 border-b border-[var(--border)] shrink-0 bg-[var(--surface)]">
       {/* Hamburger - mobile only */}
       <button
-        className="md:hidden p-2 rounded-xl text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] transition-colors"
+        className="md:hidden p-2 rounded-[9px] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] transition-colors"
         onClick={onMenuToggle}
         aria-label="Menu"
       >
-        <Menu size={22} />
+        <Menu size={20} />
       </button>
 
       {/* Title */}
-      <h1 className="text-xl font-bold text-[var(--text-primary)] min-w-0 truncate tracking-tight">
+      <h1 className="text-[17px] font-bold text-[var(--text-primary)] min-w-0 truncate tracking-[-0.4px]">
         {viewLabel(activeView)}
       </h1>
 
@@ -68,7 +68,7 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
       {/* Search */}
       <div className="relative">
         <Search
-          size={15}
+          size={13}
           className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
         />
         <input
@@ -79,11 +79,12 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
             else setView('today');
           }}
           onFocus={() => { if (searchQuery) setView('search'); }}
-          placeholder="Rechercher… (/)"
-          className="pl-9 pr-3 py-2 text-sm bg-[var(--surface-hover)] border-2 border-[var(--border)]
-                     rounded-xl w-40 md:w-56 text-[var(--text-primary)] placeholder:text-[var(--text-muted)]
-                     focus:outline-none focus:border-[var(--accent)] focus:w-52 md:focus:w-80 transition-all"
+          placeholder="Rechercher…"
+          className="pl-8 pr-8 py-1.5 text-[13px] bg-[var(--bg)] border border-[var(--border)]
+                     rounded-[9px] w-40 md:w-52 text-[var(--text-primary)] placeholder:text-[var(--text-muted)]
+                     focus:outline-none focus:border-[var(--accent)] focus:w-48 md:focus:w-72 transition-all"
         />
+        <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[11px] text-[var(--text-muted)] bg-[var(--border)] rounded px-[5px] py-px pointer-events-none">/</span>
       </div>
 
       <ThemeToggle />
@@ -92,10 +93,11 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
         variant="primary"
         size="md"
         onClick={() => openTaskForm()}
+        className="rounded-[9px] text-[13px] font-semibold"
       >
-        <Plus size={16} />
-        <span className="hidden sm:inline font-semibold">Nouvelle tâche</span>
-        <span className="sm:hidden font-semibold">+</span>
+        <Plus size={15} />
+        <span className="hidden sm:inline">Nouvelle tâche</span>
+        <span className="sm:hidden">+</span>
       </Button>
     </header>
   );

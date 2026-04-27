@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { ArrowUpDown } from 'lucide-react';
 import { useStore } from '../../store';
 import { TaskList } from '../tasks/TaskList';
 import { isOverdue, isToday } from '../../lib/utils';
@@ -27,6 +26,15 @@ function sortTasks(tasks: Task[], sort: SortKey): Task[] {
   return tasks;
 }
 
+function SectionLabel({ color, label }: { color: string; label: string }) {
+  return (
+    <div className="flex items-center gap-2 mb-[10px]">
+      <span className="w-[6px] h-[6px] rounded-full shrink-0" style={{ backgroundColor: color }} />
+      <span className="text-[11px] font-bold uppercase tracking-[0.08em]" style={{ color }}>{label}</span>
+    </div>
+  );
+}
+
 export function TodayView() {
   const tasks = useStore((s) => s.tasks);
   const [sort, setSort] = useState<SortKey>('default');
@@ -49,26 +57,26 @@ export function TodayView() {
   const monthName = MONTH_NAMES[now.getMonth()];
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-8">
-      {/* Header style Taskly */}
+    <div className="max-w-[640px] mx-auto px-12 py-9">
+      {/* Header */}
       <div className="flex items-end justify-between mb-8">
         <div>
-          <h1 className="text-4xl font-bold text-[var(--text-primary)] tracking-tight leading-none">
+          <h1 className="text-[30px] font-bold text-[var(--text-primary)] tracking-[-0.6px] leading-none">
             Aujourd'hui
           </h1>
-          <p className="text-lg font-semibold text-[var(--accent)] mt-1">
+          <p className="text-[14px] font-semibold text-[var(--accent)] mt-[5px]">
             {dayName} {dayNum} {monthName}
           </p>
         </div>
 
-        {/* Sort control */}
-        <div className="flex items-center gap-2 pb-1">
-          <ArrowUpDown size={14} className="text-[var(--text-muted)]" />
+        {/* Sort */}
+        <div className="flex items-center gap-2 pb-0.5">
+          <span className="text-[12px] text-[var(--text-muted)]">Trier par</span>
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value as SortKey)}
-            className="bg-[var(--surface-hover)] border-2 border-[var(--border)] rounded-xl px-3 py-1.5
-                       text-[var(--text-secondary)] text-sm font-medium focus:outline-none
+            className="bg-[var(--bg)] border border-[var(--border)] rounded-[7px] px-2.5 py-1
+                       text-[var(--text-secondary)] text-[12px] font-medium focus:outline-none
                        focus:border-[var(--accent)] cursor-pointer transition-colors"
           >
             <option value="default">Par défaut</option>
@@ -81,34 +89,26 @@ export function TodayView() {
 
       {overdue.length > 0 && (
         <section className="mb-8">
-          <h2 className="text-sm font-bold text-red-500 uppercase tracking-widest mb-4 flex items-center gap-2.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-red-500 inline-block" />
-            En retard · {overdue.length}
-          </h2>
+          <SectionLabel color="#EF4444" label={`En retard · ${overdue.length}`} />
           <TaskList tasks={overdue} draggable={sort === 'default'} />
         </section>
       )}
 
       <section className="mb-8">
-        <h2 className="text-sm font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-4 flex items-center gap-2.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-[var(--accent)] inline-block" />
-          Aujourd'hui {today.length > 0 && `· ${today.length}`}
-        </h2>
+        <SectionLabel
+          color="var(--accent)"
+          label={`Aujourd'hui${today.length > 0 ? ` · ${today.length}` : ''}`}
+        />
         <TaskList
           tasks={today}
           draggable={sort === 'default'}
-          emptyMessage={
-            overdue.length === 0 ? "Tout est à jour ! 🎉" : "Aucune tâche pour aujourd'hui"
-          }
+          emptyMessage={overdue.length === 0 ? "Tout est à jour ! 🎉" : "Aucune tâche pour aujourd'hui"}
         />
       </section>
 
       {completed.length > 0 && (
         <section>
-          <h2 className="text-sm font-bold text-[var(--text-muted)] uppercase tracking-widest mb-4 flex items-center gap-2.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-green-500 inline-block" />
-            Terminées · {completed.length}
-          </h2>
+          <SectionLabel color="var(--text-muted)" label={`Terminées · ${completed.length}`} />
           <TaskList tasks={completed} draggable={false} />
         </section>
       )}

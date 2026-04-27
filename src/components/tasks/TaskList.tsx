@@ -23,12 +23,14 @@ interface TaskListProps {
   tasks: Task[];
   draggable?: boolean;
   emptyMessage?: string;
+  variant?: 'row' | 'card';
 }
 
 export function TaskList({
   tasks,
   draggable = true,
   emptyMessage = 'Aucune tâche',
+  variant = 'row',
 }: TaskListProps) {
   const reorderTasks = useStore((s) => s.reorderTasks);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -67,12 +69,16 @@ export function TaskList({
     );
   }
 
+  const containerClass = variant === 'row'
+    ? 'divide-y divide-[var(--border)]'
+    : 'space-y-2';
+
   if (!draggable) {
     return (
-      <div className="space-y-2">
+      <div className={containerClass}>
         <AnimatePresence mode="popLayout">
           {tasks.map((task) => (
-            <TaskItem key={task.id} task={task} draggable={false} />
+            <TaskItem key={task.id} task={task} draggable={false} variant={variant} />
           ))}
         </AnimatePresence>
       </div>
@@ -90,10 +96,10 @@ export function TaskList({
         items={tasks.map((t) => t.id)}
         strategy={verticalListSortingStrategy}
       >
-        <div className="space-y-2.5">
+        <div className={containerClass}>
           <AnimatePresence mode="popLayout">
             {tasks.map((task) => (
-              <TaskItem key={task.id} task={task} draggable />
+              <TaskItem key={task.id} task={task} draggable variant={variant} />
             ))}
           </AnimatePresence>
         </div>
@@ -101,7 +107,7 @@ export function TaskList({
       <DragOverlay dropAnimation={null}>
         {activeTask && (
           <div className="drag-overlay">
-            <TaskItem task={activeTask} draggable={false} />
+            <TaskItem task={activeTask} draggable={false} variant={variant} />
           </div>
         )}
       </DragOverlay>

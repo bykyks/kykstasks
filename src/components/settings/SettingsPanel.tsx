@@ -84,7 +84,7 @@ export function SettingsPanel() {
         onClick={toggleSettings}
       />
       <motion.aside
-        className="relative ml-auto w-96 h-full bg-[var(--surface)] border-l border-[var(--border)]
+        className="relative ml-auto w-[480px] h-full bg-[var(--surface)] border-l border-[var(--border)]
                    flex flex-col shadow-2xl overflow-hidden"
         initial={{ x: '100%' }}
         animate={{ x: 0 }}

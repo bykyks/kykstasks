@@ -68,8 +68,8 @@ export const PRIORITY_CONFIG: Record<
   Priority,
   { label: string; color: string; bgColor: string }
 > = {
-  low:    { label: 'Basse',   color: '#22c55e', bgColor: '#22c55e1a' },
-  medium: { label: 'Moyenne', color: '#3b82f6', bgColor: '#3b82f61a' },
+  low:    { label: 'Basse',   color: '#9CA3AF', bgColor: '#9CA3AF1a' },
+  medium: { label: 'Moyenne', color: '#EAB308', bgColor: '#EAB3081a' },
   high:   { label: 'Haute',   color: '#f97316', bgColor: '#f973161a' },
   urgent: { label: 'Urgente', color: '#ef4444', bgColor: '#ef44441a' },
 };

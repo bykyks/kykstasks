@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { ArrowUpDown } from 'lucide-react';
 import { useStore } from '../../store';
 import { TaskList } from '../tasks/TaskList';
 import type { Priority, Task } from '../../types';
@@ -39,50 +38,56 @@ export function AllTasksView() {
     sort,
   );
 
-  const filters: { key: Filter; label: string; color?: string }[] = [
-    { key: 'all', label: 'Actives' },
-    ...Object.entries(PRIORITY_CONFIG).map(([k, v]) => ({
-      key: k as Priority,
-      label: v.label,
-      color: v.color,
-    })),
-    { key: 'completed', label: 'Terminées' },
-  ];
+  const sortKeys: SortKey[] = ['default', 'priority', 'date', 'title'];
+  const sortLabels: Record<SortKey, string> = {
+    default: 'Par défaut',
+    priority: 'Priorité',
+    date: 'Date',
+    title: 'Titre',
+  };
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-6">
-      {/* Filter + Sort bar */}
-      <div className="flex items-center gap-1.5 mb-5 flex-wrap">
-        {filters.map((f) => (
+    <div className="max-w-[680px] mx-auto px-12 py-7">
+      {/* Sort chips */}
+      <div className="flex items-center gap-2 mb-6 flex-wrap">
+        <span className="text-[12px] text-[var(--text-muted)]">Trier par</span>
+        {sortKeys.map((s) => (
           <button
-            key={f.key}
-            onClick={() => setFilter(f.key)}
-            className={`px-3 py-1 rounded-full text-xs font-medium transition-colors border ${
-              filter === f.key
-                ? 'bg-[var(--accent)] border-[var(--accent)] text-white'
-                : 'border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--accent)]/40'
+            key={s}
+            onClick={() => setSort(s)}
+            className={`px-[11px] py-[4px] rounded-[7px] text-[12px] font-medium transition-colors border ${
+              sort === s
+                ? 'bg-[var(--surface-active)] border-[var(--accent)] text-[var(--accent)]'
+                : 'border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--border)]'
             }`}
-            style={filter === f.key && f.color ? { backgroundColor: f.color, borderColor: f.color } : {}}
           >
-            {f.label}
+            {sortLabels[s]}
           </button>
         ))}
+      </div>
 
-        <div className="ml-auto flex items-center gap-1.5">
-          <ArrowUpDown size={12} className="text-[var(--text-muted)]" />
-          <select
-            value={sort}
-            onChange={(e) => setSort(e.target.value as SortKey)}
-            className="bg-[var(--surface-hover)] border border-[var(--border)] rounded-lg px-2 py-1
-                       text-[var(--text-secondary)] text-xs focus:outline-none focus:ring-1
-                       focus:ring-[var(--accent)] cursor-pointer"
-          >
-            <option value="default">Par défaut</option>
-            <option value="priority">Priorité</option>
-            <option value="date">Date</option>
-            <option value="title">Titre</option>
-          </select>
-        </div>
+      {/* Filter tabs */}
+      <div className="flex items-center gap-1 mb-6 bg-[var(--bg)] border border-[var(--border)] rounded-[9px] p-[3px] w-fit">
+        {(['all', 'urgent', 'high', 'medium', 'low', 'completed'] as Filter[]).map((f) => {
+          const isActive = filter === f;
+          const label =
+            f === 'all' ? 'Actives' :
+            f === 'completed' ? 'Terminées' :
+            PRIORITY_CONFIG[f as Priority].label;
+          return (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`px-3 py-[4px] rounded-[7px] text-[12.5px] transition-colors ${
+                isActive
+                  ? 'bg-[var(--surface)] text-[var(--text-primary)] font-semibold shadow-sm'
+                  : 'text-[var(--text-secondary)] font-medium hover:text-[var(--text-primary)]'
+              }`}
+            >
+              {label}
+            </button>
+          );
+        })}
       </div>
 
       <TaskList
