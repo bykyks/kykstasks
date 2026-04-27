@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
 import { useStore } from '../../store';
+import { DashboardView } from '../views/DashboardView';
 import { TodayView } from '../views/TodayView';
 import { UpcomingView } from '../views/UpcomingView';
 import { AllTasksView } from '../views/AllTasksView';
@@ -17,6 +18,7 @@ import { QuickAdd } from '../ui/QuickAdd';
 function MainContent() {
   const activeView = useStore((s) => s.activeView);
 
+  if (activeView === 'dashboard') return <DashboardView />;
   if (activeView === 'today') return <TodayView />;
   if (activeView === 'upcoming') return <UpcomingView />;
   if (activeView === 'all') return <AllTasksView />;

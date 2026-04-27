@@ -3,6 +3,7 @@ export type RecurrenceType = 'none' | 'daily' | 'weekly' | 'monthly';
 export type KanbanStatus = 'todo' | 'in_progress' | 'done';
 export type Theme = 'light' | 'dark' | 'system';
 export type View =
+  | 'dashboard'
   | 'today'
   | 'upcoming'
   | 'all'

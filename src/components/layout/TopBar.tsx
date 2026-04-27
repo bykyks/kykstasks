@@ -5,6 +5,7 @@ import { Button } from '../ui/Button';
 import type { View, Theme } from '../../types';
 
 const VIEW_LABELS: Record<string, string> = {
+  dashboard: 'Dashboard',
   today: "Aujourd'hui",
   upcoming: 'À venir',
   all: 'Toutes les tâches',
@@ -47,18 +48,18 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
   const { activeView, searchQuery, setSearchQuery, setView, openTaskForm } = useStore();
 
   return (
-    <header className="flex items-center gap-3 px-4 md:px-5 h-14 border-b border-[var(--border)] shrink-0">
+    <header className="flex items-center gap-3 px-5 md:px-6 h-16 border-b border-[var(--border)] shrink-0 bg-[var(--surface)]">
       {/* Hamburger - mobile only */}
       <button
-        className="md:hidden p-1.5 rounded-lg text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] transition-colors"
+        className="md:hidden p-2 rounded-xl text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] transition-colors"
         onClick={onMenuToggle}
         aria-label="Menu"
       >
-        <Menu size={20} />
+        <Menu size={22} />
       </button>
 
       {/* Title */}
-      <h1 className="text-lg font-semibold text-[var(--text-primary)] min-w-0 truncate">
+      <h1 className="text-xl font-bold text-[var(--text-primary)] min-w-0 truncate tracking-tight">
         {viewLabel(activeView)}
       </h1>
 
@@ -67,8 +68,8 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
       {/* Search */}
       <div className="relative">
         <Search
-          size={14}
-          className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
+          size={15}
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
         />
         <input
           value={searchQuery}
@@ -79,9 +80,9 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
           }}
           onFocus={() => { if (searchQuery) setView('search'); }}
           placeholder="Rechercher… (/)"
-          className="pl-8 pr-3 py-1.5 text-sm bg-[var(--surface-hover)] border border-[var(--border)]
-                     rounded-lg w-36 md:w-52 text-[var(--text-primary)] placeholder:text-[var(--text-muted)]
-                     focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:w-48 md:focus:w-72 transition-all"
+          className="pl-9 pr-3 py-2 text-sm bg-[var(--surface-hover)] border-2 border-[var(--border)]
+                     rounded-xl w-40 md:w-56 text-[var(--text-primary)] placeholder:text-[var(--text-muted)]
+                     focus:outline-none focus:border-[var(--accent)] focus:w-52 md:focus:w-80 transition-all"
         />
       </div>
 
@@ -89,13 +90,12 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
 
       <Button
         variant="primary"
-        size="sm"
+        size="md"
         onClick={() => openTaskForm()}
       >
-        <Plus size={14} />
-        <span className="hidden sm:inline">Nouvelle tâche</span>
-        <span className="sm:hidden">+</span>
-        <span className="ml-1 opacity-60 text-xs hidden sm:inline">n</span>
+        <Plus size={16} />
+        <span className="hidden sm:inline font-semibold">Nouvelle tâche</span>
+        <span className="sm:hidden font-semibold">+</span>
       </Button>
     </header>
   );

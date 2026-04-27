@@ -60,7 +60,7 @@ export const useStore = create<AppState>()(
     projects: [],
     tags: [],
     settings: null,
-    activeView: 'today',
+    activeView: 'dashboard',
     selectedTaskId: null,
     showTaskForm: false,
     editingTaskId: null,
