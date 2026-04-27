@@ -1,17 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { X, Download, Upload, Database, LogOut } from 'lucide-react';
+import { X, Download, Upload, Database, LogOut, Bell, BellOff, BellRing, HardDriveDownload } from 'lucide-react';
 import { useStore } from '../../store';
 import { Button } from '../ui/Button';
 import { supabase } from '../../lib/supabase';
 import type { Settings, Theme } from '../../types';
-import { handleExportJson, handleExportCsv, handleImportJson } from '../../lib/export';
+import { handleExportJson, handleExportCsv, handleImportJson, hasLocalBackup, restoreLocalBackup } from '../../lib/export';
+import { ensureNotificationPermission, sendDailyDigest } from '../../lib/notifications';
 
 export function SettingsPanel() {
   const { settings, saveSettings, toggleSettings, loadAll } = useStore();
   const [local, setLocal] = useState<Settings | null>(settings);
   const [importing, setImporting] = useState(false);
   const [importMsg, setImportMsg] = useState('');
+  const [notifPermission, setNotifPermission] = useState<NotificationPermission | 'unsupported'>(
+    'Notification' in window ? Notification.permission : 'unsupported',
+  );
+  const [digestTesting, setDigestTesting] = useState(false);
+  const [localBackupInfo, setLocalBackupInfo] = useState(() => hasLocalBackup());
+  const [restoreMsg, setRestoreMsg] = useState('');
 
   useEffect(() => setLocal(settings), [settings]);
 
@@ -43,6 +50,28 @@ export function SettingsPanel() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+  };
+
+  const handleEnableNotifications = async () => {
+    const granted = await ensureNotificationPermission();
+    setNotifPermission(granted ? 'granted' : Notification.permission);
+  };
+
+  const handleTestDigest = async () => {
+    setDigestTesting(true);
+    await sendDailyDigest();
+    setDigestTesting(false);
+  };
+
+  const handleRestoreBackup = async () => {
+    const ok = await restoreLocalBackup();
+    if (ok) {
+      await loadAll();
+      setRestoreMsg('Sauvegarde restaurée !');
+    } else {
+      setRestoreMsg('Échec de la restauration');
+    }
+    setTimeout(() => setRestoreMsg(''), 3000);
   };
 
   return (
@@ -100,6 +129,39 @@ export function SettingsPanel() {
             <h3 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">
               Notifications
             </h3>
+
+            {/* Permission status */}
+            {notifPermission === 'unsupported' ? (
+              <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
+                <BellOff size={14} />
+                <span>Notifications non supportées par ce navigateur</span>
+              </div>
+            ) : notifPermission === 'granted' ? (
+              <div className="flex items-center gap-2 text-xs text-green-500">
+                <Bell size={14} />
+                <span>Notifications activées</span>
+              </div>
+            ) : notifPermission === 'denied' ? (
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2 text-xs text-red-500">
+                  <BellOff size={14} />
+                  <span>Notifications bloquées par le navigateur</span>
+                </div>
+                <p className="text-xs text-[var(--text-muted)]">
+                  Autorisez les notifications dans les paramètres de votre navigateur pour ce site.
+                </p>
+              </div>
+            ) : (
+              <Button
+                variant="secondary"
+                className="w-full justify-start gap-2"
+                onClick={handleEnableNotifications}
+              >
+                <BellRing size={14} />
+                Activer les notifications
+              </Button>
+            )}
+
             <div>
               <label className="text-sm text-[var(--text-primary)] block mb-2">
                 Rappel par défaut
@@ -117,6 +179,7 @@ export function SettingsPanel() {
                 ))}
               </select>
             </div>
+
             <label className="flex items-center gap-3 cursor-pointer">
               <div
                 onClick={() => update({ daily_digest_enabled: !local.daily_digest_enabled })}
@@ -133,17 +196,28 @@ export function SettingsPanel() {
               <span className="text-sm text-[var(--text-primary)]">Résumé quotidien</span>
             </label>
             {local.daily_digest_enabled && (
-              <div>
-                <label className="text-sm text-[var(--text-secondary)] block mb-1.5">
-                  Heure du résumé
-                </label>
-                <input
-                  type="time"
-                  value={local.daily_digest_time}
-                  onChange={(e) => update({ daily_digest_time: e.target.value })}
-                  className="text-sm bg-[var(--surface-hover)] border border-[var(--border)]
-                             rounded-lg px-3 py-1.5 text-[var(--text-primary)] focus:outline-none"
-                />
+              <div className="space-y-2">
+                <div>
+                  <label className="text-sm text-[var(--text-secondary)] block mb-1.5">
+                    Heure du résumé
+                  </label>
+                  <input
+                    type="time"
+                    value={local.daily_digest_time}
+                    onChange={(e) => update({ daily_digest_time: e.target.value })}
+                    className="text-sm bg-[var(--surface-hover)] border border-[var(--border)]
+                               rounded-lg px-3 py-1.5 text-[var(--text-primary)] focus:outline-none"
+                  />
+                </div>
+                <Button
+                  variant="secondary"
+                  className="w-full justify-start gap-2"
+                  onClick={handleTestDigest}
+                  disabled={digestTesting || notifPermission !== 'granted'}
+                >
+                  <Bell size={14} />
+                  {digestTesting ? 'Envoi…' : 'Tester le résumé maintenant'}
+                </Button>
               </div>
             )}
           </section>
@@ -153,6 +227,46 @@ export function SettingsPanel() {
             <h3 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">
               Données
             </h3>
+
+            {/* Auto-backup toggle */}
+            <label className="flex items-center gap-3 cursor-pointer">
+              <div
+                onClick={() => update({ backup_enabled: !local.backup_enabled })}
+                className={`w-10 h-5.5 rounded-full relative transition-colors ${
+                  local.backup_enabled ? 'bg-[var(--accent)]' : 'bg-[var(--border)]'
+                }`}
+              >
+                <span
+                  className={`absolute top-0.5 w-4.5 h-4.5 bg-white rounded-full shadow transition-transform ${
+                    local.backup_enabled ? 'translate-x-5' : 'translate-x-0.5'
+                  }`}
+                />
+              </div>
+              <span className="text-sm text-[var(--text-primary)]">Sauvegarde locale auto</span>
+            </label>
+            {local.backup_enabled && (
+              <p className="text-xs text-[var(--text-muted)]">
+                Sauvegarde automatique dans votre navigateur après chaque modification.
+                {localBackupInfo && (
+                  <> Dernière : {new Date(localBackupInfo.savedAt).toLocaleString('fr-FR')}.</>
+                )}
+              </p>
+            )}
+            {localBackupInfo && (
+              <Button
+                variant="secondary"
+                className="w-full justify-start gap-2"
+                onClick={handleRestoreBackup}
+              >
+                <HardDriveDownload size={14} />
+                Restaurer depuis sauvegarde locale
+              </Button>
+            )}
+            {restoreMsg && (
+              <p className={`text-xs ${restoreMsg.includes('Échec') ? 'text-red-500' : 'text-green-500'}`}>
+                {restoreMsg}
+              </p>
+            )}
 
             <div className="space-y-2 pt-1">
               <Button

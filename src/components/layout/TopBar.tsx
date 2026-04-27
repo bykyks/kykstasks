@@ -62,6 +62,7 @@ export function TopBar() {
           onChange={(e) => {
             setSearchQuery(e.target.value);
             if (e.target.value) setView('search');
+            else setView('today');
           }}
           onFocus={() => { if (searchQuery) setView('search'); }}
           placeholder="Rechercher… (/)"

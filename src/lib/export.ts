@@ -1,5 +1,39 @@
 import { exportJsonData, exportCsvData, importJsonData } from './db';
 
+const LOCAL_BACKUP_KEY = 'kykstasks-local-backup';
+
+export async function saveLocalBackup(): Promise<void> {
+  try {
+    const data = await exportJsonData();
+    localStorage.setItem(LOCAL_BACKUP_KEY, JSON.stringify({ data, savedAt: new Date().toISOString() }));
+  } catch {
+    // silently ignore
+  }
+}
+
+export function hasLocalBackup(): { savedAt: string } | null {
+  try {
+    const raw = localStorage.getItem(LOCAL_BACKUP_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed.savedAt ? { savedAt: parsed.savedAt } : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function restoreLocalBackup(): Promise<boolean> {
+  try {
+    const raw = localStorage.getItem(LOCAL_BACKUP_KEY);
+    if (!raw) return false;
+    const { data } = JSON.parse(raw);
+    await importJsonData(data);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function handleExportJson(): Promise<void> {
   const data = await exportJsonData();
   downloadBlob(data, `kykstasks-backup-${today()}.json`, 'application/json');

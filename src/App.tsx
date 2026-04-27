@@ -7,11 +7,13 @@ import { LoginPage } from './components/auth/LoginPage';
 import { useTheme } from './hooks/useTheme';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useNotifications } from './hooks/useNotifications';
+import { useAutoBackup } from './hooks/useAutoBackup';
 
 function AppInner() {
   useTheme();
   useKeyboardShortcuts();
   useNotifications();
+  useAutoBackup();
   return <AppLayout />;
 }
 
