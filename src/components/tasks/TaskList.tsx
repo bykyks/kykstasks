@@ -1,7 +1,8 @@
-import React from 'react';
-import type { DragEndEvent } from '@dnd-kit/core';
+import React, { useState } from 'react';
+import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import {
   DndContext,
+  DragOverlay,
   closestCenter,
   KeyboardSensor,
   PointerSensor,
@@ -30,13 +31,20 @@ export function TaskList({
   emptyMessage = 'Aucune tâche',
 }: TaskListProps) {
   const reorderTasks = useStore((s) => s.reorderTasks);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const activeTask = activeId ? tasks.find((t) => t.id === activeId) : null;
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
 
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(String(event.active.id));
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
+    setActiveId(null);
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
@@ -75,6 +83,7 @@ export function TaskList({
     <DndContext
       sensors={sensors}
       collisionDetection={closestCenter}
+      onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
       <SortableContext
@@ -89,6 +98,13 @@ export function TaskList({
           </AnimatePresence>
         </div>
       </SortableContext>
+      <DragOverlay dropAnimation={null}>
+        {activeTask && (
+          <div className="drag-overlay">
+            <TaskItem task={activeTask} draggable={false} />
+          </div>
+        )}
+      </DragOverlay>
     </DndContext>
   );
 }

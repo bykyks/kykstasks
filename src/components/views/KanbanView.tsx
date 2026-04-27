@@ -1,17 +1,18 @@
-import React from 'react';
-import type { DragEndEvent } from '@dnd-kit/core';
+import React, { useState } from 'react';
+import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import {
   DndContext,
+  DragOverlay,
   PointerSensor,
   useSensor,
   useSensors,
   closestCenter,
+  useDroppable,
 } from '@dnd-kit/core';
 import {
   SortableContext,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { useDroppable } from '@dnd-kit/core';
 import { useStore } from '../../store';
 import type { KanbanStatus, Task } from '../../types';
 import { TaskItem } from '../tasks/TaskItem';
@@ -83,6 +84,8 @@ function KanbanColumn({
 export function KanbanView() {
   const { tasks, updateTask } = useStore();
   const activeTasks = tasks.filter((t) => !t.completed);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const activeTask = activeId ? tasks.find((t) => t.id === activeId) : null;
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -91,20 +94,23 @@ export function KanbanView() {
   const columnTasks = (col: KanbanStatus) =>
     activeTasks.filter((t) => t.kanban_status === col);
 
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(String(event.active.id));
+  };
+
   const handleDragEnd = async (event: DragEndEvent) => {
+    setActiveId(null);
     const { active, over } = event;
     if (!over) return;
 
     const taskId = String(active.id);
     const overId = String(over.id);
 
-    // If dropped on a column header droppable
     if (COLUMNS.some((c) => c.id === overId)) {
       await updateTask({ id: taskId, kanban_status: overId as KanbanStatus });
       return;
     }
 
-    // If dropped on another task, inherit its column status
     const overTask = tasks.find((t) => t.id === overId);
     const dragTask = tasks.find((t) => t.id === taskId);
     if (overTask && dragTask && overTask.kanban_status !== dragTask.kanban_status) {
@@ -118,6 +124,7 @@ export function KanbanView() {
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
         >
           {COLUMNS.map((col) => (
@@ -127,6 +134,13 @@ export function KanbanView() {
               tasks={columnTasks(col.id)}
             />
           ))}
+          <DragOverlay dropAnimation={null}>
+            {activeTask && (
+              <div className="drag-overlay">
+                <TaskItem task={activeTask} draggable={false} />
+              </div>
+            )}
+          </DragOverlay>
         </DndContext>
       </div>
     </div>

@@ -5,6 +5,9 @@ import { TaskList } from '../tasks/TaskList';
 import { isOverdue, isToday } from '../../lib/utils';
 import type { Task } from '../../types';
 
+const DAY_NAMES = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+const MONTH_NAMES = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+
 type SortKey = 'default' | 'priority' | 'date' | 'title';
 
 const PRIORITY_ORDER: Record<string, number> = { urgent: 0, high: 1, medium: 2, low: 3 };
@@ -40,18 +43,33 @@ export function TodayView() {
     (t) => t.completed && (isToday(t.due_date) || isToday(t.completed_at)),
   );
 
+  const now = new Date();
+  const dayName = DAY_NAMES[now.getDay()];
+  const dayNum = now.getDate();
+  const monthName = MONTH_NAMES[now.getMonth()];
+
   return (
-    <div className="max-w-4xl mx-auto px-6 py-6">
-      {/* Sort control */}
-      <div className="flex items-center justify-end mb-4">
-        <div className="flex items-center gap-1.5">
-          <ArrowUpDown size={12} className="text-[var(--text-muted)]" />
+    <div className="max-w-4xl mx-auto px-6 py-8">
+      {/* Header style Taskly */}
+      <div className="flex items-end justify-between mb-8">
+        <div>
+          <h1 className="text-4xl font-bold text-[var(--text-primary)] tracking-tight leading-none">
+            Aujourd'hui
+          </h1>
+          <p className="text-lg font-semibold text-[var(--accent)] mt-1">
+            {dayName} {dayNum} {monthName}
+          </p>
+        </div>
+
+        {/* Sort control */}
+        <div className="flex items-center gap-2 pb-1">
+          <ArrowUpDown size={14} className="text-[var(--text-muted)]" />
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value as SortKey)}
-            className="bg-[var(--surface-hover)] border border-[var(--border)] rounded-lg px-2 py-1
-                       text-[var(--text-secondary)] text-xs focus:outline-none focus:ring-1
-                       focus:ring-[var(--accent)] cursor-pointer"
+            className="bg-[var(--surface-hover)] border-2 border-[var(--border)] rounded-xl px-3 py-1.5
+                       text-[var(--text-secondary)] text-sm font-medium focus:outline-none
+                       focus:border-[var(--accent)] cursor-pointer transition-colors"
           >
             <option value="default">Par défaut</option>
             <option value="priority">Priorité</option>
@@ -62,19 +80,19 @@ export function TodayView() {
       </div>
 
       {overdue.length > 0 && (
-        <section className="mb-6">
-          <h2 className="text-xs font-semibold text-red-500 uppercase tracking-wide mb-3 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-red-500 inline-block" />
-            En retard ({overdue.length})
+        <section className="mb-8">
+          <h2 className="text-sm font-bold text-red-500 uppercase tracking-widest mb-4 flex items-center gap-2.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-red-500 inline-block" />
+            En retard · {overdue.length}
           </h2>
           <TaskList tasks={overdue} draggable={sort === 'default'} />
         </section>
       )}
 
-      <section className="mb-6">
-        <h2 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-3 flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-[var(--accent)] inline-block" />
-          Aujourd'hui {today.length > 0 && `(${today.length})`}
+      <section className="mb-8">
+        <h2 className="text-sm font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-4 flex items-center gap-2.5">
+          <span className="w-2.5 h-2.5 rounded-full bg-[var(--accent)] inline-block" />
+          Aujourd'hui {today.length > 0 && `· ${today.length}`}
         </h2>
         <TaskList
           tasks={today}
@@ -87,9 +105,9 @@ export function TodayView() {
 
       {completed.length > 0 && (
         <section>
-          <h2 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-3 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-green-500 inline-block" />
-            Terminées aujourd'hui ({completed.length})
+          <h2 className="text-sm font-bold text-[var(--text-muted)] uppercase tracking-widest mb-4 flex items-center gap-2.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-green-500 inline-block" />
+            Terminées · {completed.length}
           </h2>
           <TaskList tasks={completed} draggable={false} />
         </section>

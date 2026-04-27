@@ -32,7 +32,7 @@ export function TaskItem({ task, draggable = false }: TaskItemProps) {
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition,
+    transition: isDragging ? 'none' : transition,
   };
 
   const taskTags = tags.filter((t) => task.tags.includes(t.id));
@@ -45,23 +45,35 @@ export function TaskItem({ task, draggable = false }: TaskItemProps) {
     setCompleting(false);
   };
 
+  if (isDragging) {
+    return (
+      <div
+        ref={setNodeRef}
+        style={{ ...style, borderLeftColor: priority.color }}
+        className="rounded-2xl border-2 border-dashed border-[var(--border)] bg-[var(--surface-active)]/40 border-l-[5px] py-4 px-5 min-h-[72px]"
+      />
+    );
+  }
+
   return (
     <motion.div
       ref={setNodeRef}
       {...(draggable ? { ...attributes, ...listeners } : {})}
       layout
-      initial={{ opacity: 0, y: -4 }}
-      animate={{ opacity: isDragging ? 0.5 : 1, y: 0 }}
+      initial={{ opacity: 0, y: -6 }}
+      animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, height: 0 }}
       onClick={() => selectTask(isSelected ? null : task.id)}
       className={cn(
-        'group flex items-start gap-3 px-4 py-3.5 rounded-xl cursor-pointer select-none',
-        'border transition-all duration-150',
+        'group flex items-start gap-4 px-5 py-4 rounded-2xl select-none',
+        'border-2 transition-all duration-200',
+        'shadow-sm hover:shadow-md',
+        draggable && 'task-draggable',
         isSelected
-          ? 'bg-[var(--accent)]/8 border-[var(--accent)]/30'
-          : 'bg-[var(--surface)] border-[var(--border)] hover:border-[var(--accent)]/20 hover:bg-[var(--surface-hover)]',
+          ? 'bg-[var(--surface-active)] border-[var(--accent)]/60'
+          : 'bg-[var(--surface)] border-[var(--border)] hover:border-[var(--accent)]/30 hover:bg-[var(--surface-hover)]',
         task.completed && 'opacity-50',
-        'border-l-4',
+        'border-l-[5px]',
       )}
       style={{
         ...style,
@@ -72,16 +84,16 @@ export function TaskItem({ task, draggable = false }: TaskItemProps) {
       <button
         onClick={handleComplete}
         className={cn(
-          'mt-0.5 shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all',
+          'mt-0.5 shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all',
           completing && 'animate-check-bounce',
           task.completed
             ? 'bg-[var(--accent)] border-[var(--accent)]'
-            : 'border-[var(--border)] hover:border-[var(--accent)]',
+            : 'border-[var(--border)] hover:border-[var(--accent)] hover:bg-[var(--surface-active)]',
         )}
       >
         {task.completed && (
-          <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-            <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <svg width="11" height="9" viewBox="0 0 10 8" fill="none">
+            <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         )}
       </button>
@@ -90,29 +102,29 @@ export function TaskItem({ task, draggable = false }: TaskItemProps) {
       <div className="flex-1 min-w-0">
         <p
           className={cn(
-            'text-sm font-semibold text-[var(--text-primary)] truncate',
+            'text-base font-semibold text-[var(--text-primary)] truncate leading-snug',
             task.completed && 'line-through text-[var(--text-muted)]',
           )}
         >
           {task.title}
         </p>
 
-        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+        <div className="flex items-center gap-2.5 mt-2 flex-wrap">
           {task.due_date && (
             <span
               className={cn(
-                'flex items-center gap-1 text-xs',
-                overdue ? 'text-red-500 font-medium' : 'text-[var(--text-muted)]',
+                'flex items-center gap-1.5 text-xs font-medium',
+                overdue ? 'text-red-500' : 'text-[var(--text-muted)]',
               )}
             >
-              <Calendar size={11} />
+              <Calendar size={12} />
               {formatDate(task.due_date)}
-              {task.due_time && ` ${task.due_time}`}
+              {task.due_time && ` · ${task.due_time}`}
             </span>
           )}
           {task.recurrence !== 'none' && (
-            <span className="flex items-center gap-1 text-xs text-[var(--text-muted)]">
-              <Repeat size={11} />
+            <span className="flex items-center gap-1.5 text-xs font-medium text-[var(--text-muted)]">
+              <Repeat size={12} />
               {task.recurrence}
             </span>
           )}
@@ -120,7 +132,7 @@ export function TaskItem({ task, draggable = false }: TaskItemProps) {
             <Badge key={tag.id} label={tag.name} color={tag.color} />
           ))}
           {task.subtasks.length > 0 && (
-            <span className="text-xs text-[var(--text-muted)]">
+            <span className="text-xs font-medium text-[var(--text-muted)]">
               {doneSubtasks}/{task.subtasks.length} sous-tâche{task.subtasks.length > 1 ? 's' : ''}
             </span>
           )}
@@ -131,17 +143,17 @@ export function TaskItem({ task, draggable = false }: TaskItemProps) {
       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
         <button
           onClick={(e) => { e.stopPropagation(); openTaskForm(task.id); }}
-          className="p-1.5 rounded-lg hover:bg-[var(--surface-active)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+          className="p-2 rounded-xl hover:bg-[var(--surface-active)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
         >
-          <Pencil size={13} />
+          <Pencil size={14} />
         </button>
         <button
           onClick={(e) => { e.stopPropagation(); deleteTask(task.id); }}
-          className="p-1.5 rounded-lg hover:bg-red-500/10 text-[var(--text-muted)] hover:text-red-500"
+          className="p-2 rounded-xl hover:bg-red-500/10 text-[var(--text-muted)] hover:text-red-500 transition-colors"
         >
-          <Trash2 size={13} />
+          <Trash2 size={14} />
         </button>
-        <ChevronRight size={14} className="text-[var(--text-muted)] ml-0.5" />
+        <ChevronRight size={16} className="text-[var(--text-muted)] ml-0.5" />
       </div>
     </motion.div>
   );
