@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
 import { useStore } from '../../store';
@@ -30,22 +30,30 @@ function MainContent() {
 }
 
 export function AppLayout() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const { showTaskForm, closeTaskForm, selectedTaskId, selectTask, showSettings } = useStore();
 
   return (
     <div className="flex h-screen bg-[var(--bg)] overflow-hidden">
-      <Sidebar />
+      {/* Mobile backdrop */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-30 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <div className="flex-1 flex flex-col min-w-0">
-        <TopBar />
+        <TopBar onMenuToggle={() => setSidebarOpen((o) => !o)} />
         <div className="flex-1 flex overflow-hidden">
           <main className="flex-1 overflow-y-auto">
             <MainContent />
           </main>
 
-          {/* Task detail panel */}
           {selectedTaskId && (
-            <aside className="w-96 border-l border-[var(--border)] overflow-y-auto shrink-0">
+            <aside className="fixed inset-0 z-50 bg-[var(--bg)] overflow-y-auto md:relative md:inset-auto md:z-auto md:w-96 md:border-l md:border-[var(--border)] shrink-0">
               <TaskDetail
                 taskId={selectedTaskId}
                 onClose={() => selectTask(null)}
@@ -55,7 +63,6 @@ export function AppLayout() {
         </div>
       </div>
 
-      {/* Modals */}
       <TaskForm open={showTaskForm} onClose={closeTaskForm} />
       {showSettings && <SettingsPanel />}
       <QuickAdd />

@@ -81,7 +81,7 @@ export function TaskList({
         items={tasks.map((t) => t.id)}
         strategy={verticalListSortingStrategy}
       >
-        <div className="space-y-2">
+        <div className="space-y-2.5">
           <AnimatePresence mode="popLayout">
             {tasks.map((task) => (
               <TaskItem key={task.id} task={task} draggable />

@@ -234,6 +234,14 @@ export async function deleteSubtask(id: string): Promise<void> {
   if (error) throw error;
 }
 
+export async function reorderSubtasks(ids: string[]): Promise<void> {
+  await Promise.all(
+    ids.map((id, position) =>
+      supabase.from('subtasks').update({ position }).eq('id', id),
+    ),
+  );
+}
+
 // ── Projects ───────────────────────────────────────────────────────────────
 
 export async function getProjects(): Promise<Project[]> {

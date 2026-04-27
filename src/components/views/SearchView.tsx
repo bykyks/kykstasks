@@ -17,7 +17,7 @@ export function SearchView() {
   });
 
   return (
-    <div className="max-w-2xl mx-auto px-6 py-6">
+    <div className="max-w-4xl mx-auto px-6 py-6">
       {q ? (
         <>
           <p className="text-xs text-[var(--text-muted)] mb-4">

@@ -12,7 +12,7 @@ export function ProjectView({ id }: { id: string }) {
   if (!project) return null;
 
   return (
-    <div className="max-w-2xl mx-auto px-6 py-6">
+    <div className="max-w-4xl mx-auto px-6 py-6">
       <div className="flex items-center gap-3 mb-6">
         <div
           className="w-10 h-10 rounded-xl flex items-center justify-center"

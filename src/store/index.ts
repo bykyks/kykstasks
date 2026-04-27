@@ -37,7 +37,10 @@ interface AppState {
   deleteProject: (id: string) => Promise<void>;
 
   createTag: (input: Parameters<typeof db.createTag>[0]) => Promise<void>;
+  updateTag: (id: string, name?: string, color?: string) => Promise<void>;
   deleteTag: (id: string) => Promise<void>;
+
+  reorderSubtasks: (taskId: string, ids: string[]) => Promise<void>;
 
   saveSettings: (s: Settings) => Promise<void>;
 
@@ -162,6 +165,18 @@ export const useStore = create<AppState>()(
       }));
     },
 
+    reorderSubtasks: async (taskId, ids) => {
+      await db.reorderSubtasks(ids);
+      set((s) => ({
+        tasks: s.tasks.map((t) => {
+          if (t.id !== taskId) return t;
+          const subMap = new Map(t.subtasks.map((sub) => [sub.id, sub]));
+          const reordered = ids.map((id, i) => ({ ...subMap.get(id)!, position: i }));
+          return { ...t, subtasks: reordered };
+        }),
+      }));
+    },
+
     createProject: async (input) => {
       const project = await db.createProject(input);
       set((s) => ({ projects: [...s.projects, project] }));
@@ -187,6 +202,17 @@ export const useStore = create<AppState>()(
     createTag: async (input) => {
       const tag = await db.createTag(input);
       set((s) => ({ tags: [...s.tags, tag] }));
+    },
+
+    updateTag: async (id, name, color) => {
+      await db.updateTag(id, name, color);
+      set((s) => ({
+        tags: s.tags.map((t) =>
+          t.id === id
+            ? { ...t, ...(name !== undefined && { name }), ...(color !== undefined && { color }) }
+            : t,
+        ),
+      }));
     },
 
     deleteTag: async (id) => {

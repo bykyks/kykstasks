@@ -11,7 +11,7 @@ export function TagView({ id }: { id: string }) {
   if (!tag) return null;
 
   return (
-    <div className="max-w-2xl mx-auto px-6 py-6">
+    <div className="max-w-4xl mx-auto px-6 py-6">
       <div className="flex items-center gap-2 mb-6">
         <Tag size={18} style={{ color: tag.color }} />
         <h1 className="text-xl font-bold text-[var(--text-primary)]">{tag.name}</h1>

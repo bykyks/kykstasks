@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Plus, Sun, Moon, Monitor } from 'lucide-react';
+import { Search, Plus, Sun, Moon, Monitor, Menu } from 'lucide-react';
 import { useStore } from '../../store';
 import { Button } from '../ui/Button';
 import type { View, Theme } from '../../types';
@@ -14,7 +14,7 @@ const VIEW_LABELS: Record<string, string> = {
 
 function viewLabel(view: View): string {
   if (typeof view === 'string') return VIEW_LABELS[view] ?? view;
-  return ''; // project/tag labels rendered by the view itself
+  return '';
 }
 
 function ThemeToggle() {
@@ -39,11 +39,24 @@ function ThemeToggle() {
   );
 }
 
-export function TopBar() {
+interface TopBarProps {
+  onMenuToggle?: () => void;
+}
+
+export function TopBar({ onMenuToggle }: TopBarProps) {
   const { activeView, searchQuery, setSearchQuery, setView, openTaskForm } = useStore();
 
   return (
-    <header className="flex items-center gap-3 px-5 h-14 border-b border-[var(--border)] shrink-0">
+    <header className="flex items-center gap-3 px-4 md:px-5 h-14 border-b border-[var(--border)] shrink-0">
+      {/* Hamburger - mobile only */}
+      <button
+        className="md:hidden p-1.5 rounded-lg text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] transition-colors"
+        onClick={onMenuToggle}
+        aria-label="Menu"
+      >
+        <Menu size={20} />
+      </button>
+
       {/* Title */}
       <h1 className="text-lg font-semibold text-[var(--text-primary)] min-w-0 truncate">
         {viewLabel(activeView)}
@@ -67,8 +80,8 @@ export function TopBar() {
           onFocus={() => { if (searchQuery) setView('search'); }}
           placeholder="Rechercher… (/)"
           className="pl-8 pr-3 py-1.5 text-sm bg-[var(--surface-hover)] border border-[var(--border)]
-                     rounded-lg w-52 text-[var(--text-primary)] placeholder:text-[var(--text-muted)]
-                     focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:w-72 transition-all"
+                     rounded-lg w-36 md:w-52 text-[var(--text-primary)] placeholder:text-[var(--text-muted)]
+                     focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:w-48 md:focus:w-72 transition-all"
         />
       </div>
 
@@ -80,8 +93,9 @@ export function TopBar() {
         onClick={() => openTaskForm()}
       >
         <Plus size={14} />
-        Nouvelle tâche
-        <span className="ml-1 opacity-60 text-xs">n</span>
+        <span className="hidden sm:inline">Nouvelle tâche</span>
+        <span className="sm:hidden">+</span>
+        <span className="ml-1 opacity-60 text-xs hidden sm:inline">n</span>
       </Button>
     </header>
   );

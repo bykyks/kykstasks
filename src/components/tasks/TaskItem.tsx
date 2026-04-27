@@ -55,13 +55,13 @@ export function TaskItem({ task, draggable = false }: TaskItemProps) {
       exit={{ opacity: 0, height: 0 }}
       onClick={() => selectTask(isSelected ? null : task.id)}
       className={cn(
-        'group flex items-start gap-3 px-4 py-3 rounded-xl cursor-pointer select-none',
+        'group flex items-start gap-3 px-4 py-3.5 rounded-xl cursor-pointer select-none',
         'border transition-all duration-150',
         isSelected
           ? 'bg-[var(--accent)]/8 border-[var(--accent)]/30'
           : 'bg-[var(--surface)] border-[var(--border)] hover:border-[var(--accent)]/20 hover:bg-[var(--surface-hover)]',
         task.completed && 'opacity-50',
-        `border-l-[3px]`,
+        'border-l-4',
       )}
       style={{
         ...style,
@@ -90,14 +90,14 @@ export function TaskItem({ task, draggable = false }: TaskItemProps) {
       <div className="flex-1 min-w-0">
         <p
           className={cn(
-            'text-sm font-medium text-[var(--text-primary)] truncate',
+            'text-sm font-semibold text-[var(--text-primary)] truncate',
             task.completed && 'line-through text-[var(--text-muted)]',
           )}
         >
           {task.title}
         </p>
 
-        <div className="flex items-center gap-2 mt-1 flex-wrap">
+        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
           {task.due_date && (
             <span
               className={cn(

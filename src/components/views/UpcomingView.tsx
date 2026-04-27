@@ -24,7 +24,7 @@ export function UpcomingView() {
   const noDate = tasks.filter((t) => !t.completed && !t.due_date);
 
   return (
-    <div className="max-w-2xl mx-auto px-6 py-6 space-y-6">
+    <div className="max-w-4xl mx-auto px-6 py-6 space-y-6">
       {tasksByDay.map(({ date, dateStr, tasks: dayTasks }) => (
         <section key={dateStr}>
           <h2 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-3 flex items-center gap-2">
