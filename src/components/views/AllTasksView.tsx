@@ -47,7 +47,7 @@ export function AllTasksView() {
   };
 
   return (
-    <div className="max-w-[680px] mx-auto px-12 py-7">
+    <div className="px-12 py-7">
       {/* Sort chips */}
       <div className="flex items-center gap-2 mb-6 flex-wrap">
         <span className="text-[12px] text-[var(--text-muted)]">Trier par</span>

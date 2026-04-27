@@ -57,7 +57,7 @@ export function TodayView() {
   const monthName = MONTH_NAMES[now.getMonth()];
 
   return (
-    <div className="max-w-[640px] mx-auto px-12 py-9">
+    <div className="px-12 py-9">
       {/* Header */}
       <div className="flex items-end justify-between mb-8">
         <div>
