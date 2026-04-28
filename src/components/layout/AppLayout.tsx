@@ -10,6 +10,7 @@ import { SearchView } from '../views/SearchView';
 import { KanbanView } from '../views/KanbanView';
 import { ProjectView } from '../views/ProjectView';
 import { TagView } from '../views/TagView';
+import { StatsView } from '../views/StatsView';
 import { TaskForm } from '../tasks/TaskForm';
 import { TaskDetail } from '../tasks/TaskDetail';
 import { SettingsPanel } from '../settings/SettingsPanel';
@@ -24,6 +25,7 @@ function MainContent() {
   if (activeView === 'all') return <AllTasksView />;
   if (activeView === 'search') return <SearchView />;
   if (activeView === 'kanban') return <KanbanView />;
+  if (activeView === 'stats') return <StatsView />;
   if (typeof activeView === 'object' && activeView.type === 'project')
     return <ProjectView id={activeView.id} />;
   if (typeof activeView === 'object' && activeView.type === 'tag')

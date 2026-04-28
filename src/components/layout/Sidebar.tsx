@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   Sun, Calendar, List, KanbanSquare, Tag, Plus, Settings,
-  ChevronDown, ChevronRight, Trash2, Zap, Pencil, LayoutDashboard,
+  ChevronDown, ChevronRight, Trash2, Zap, Pencil, LayoutDashboard, BarChart2,
 } from 'lucide-react';
 import { useStore } from '../../store';
 import type { View } from '../../types';
@@ -108,11 +108,12 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
 
       <nav className="flex-1 overflow-y-auto px-2 py-0 flex flex-col gap-px">
         {/* Core views */}
-        <NavItem icon={<LayoutDashboard size={14} />} label="Dashboard" view="dashboard" onClose={onClose} />
+        <NavItem icon={<LayoutDashboard size={14} />} label="Accueil" view="dashboard" onClose={onClose} />
         <NavItem icon={<Sun size={14} />} label="Aujourd'hui" view="today" badge={todayCount} onClose={onClose} />
         <NavItem icon={<Calendar size={14} />} label="À venir" view="upcoming" onClose={onClose} />
-        <NavItem icon={<List size={14} />} label="Toutes les tâches" view="all" onClose={onClose} />
-        <NavItem icon={<KanbanSquare size={14} />} label="Kanban" view="kanban" onClose={onClose} />
+        <NavItem icon={<List size={14} />} label="Tâches" view="all" onClose={onClose} />
+        <NavItem icon={<KanbanSquare size={14} />} label="Tableau" view="kanban" onClose={onClose} />
+        <NavItem icon={<BarChart2 size={14} />} label="Statistiques" view="stats" onClose={onClose} />
 
         <div className="h-px bg-[var(--sidebar-border)] mx-1 my-3.5" />
 

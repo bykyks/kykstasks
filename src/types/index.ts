@@ -9,6 +9,7 @@ export type View =
   | 'all'
   | 'search'
   | 'kanban'
+  | 'stats'
   | { type: 'project'; id: string }
   | { type: 'tag'; id: string };
 

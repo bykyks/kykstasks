@@ -17,8 +17,10 @@ interface TaskItemProps {
 }
 
 export function TaskItem({ task, draggable = false, variant = 'row', dimmed = false }: TaskItemProps) {
-  const { toggleTask, deleteTask, selectTask, selectedTaskId, openTaskForm, tags } = useStore();
+  const { toggleTask, deleteTask, selectTask, selectedTaskId, openTaskForm, tags, updateTask } = useStore();
   const [completing, setCompleting] = useState(false);
+  const [editingTitle, setEditingTitle] = useState(false);
+  const [titleValue, setTitleValue] = useState(task.title);
   const isSelected = selectedTaskId === task.id;
   const priority = PRIORITY_CONFIG[task.priority];
   const overdue = isOverdue(task.due_date) && !task.completed;
@@ -42,9 +44,21 @@ export function TaskItem({ task, draggable = false, variant = 'row', dimmed = fa
 
   const handleComplete = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (completing) return;
     setCompleting(true);
+    await new Promise((r) => setTimeout(r, 200));
     await toggleTask(task.id);
     setCompleting(false);
+  };
+
+  const handleTitleSave = async () => {
+    const trimmed = titleValue.trim();
+    if (trimmed && trimmed !== task.title) {
+      await updateTask({ id: task.id, title: trimmed });
+    } else {
+      setTitleValue(task.title);
+    }
+    setEditingTitle(false);
   };
 
   if (isDragging) {
@@ -75,7 +89,7 @@ export function TaskItem({ task, draggable = false, variant = 'row', dimmed = fa
         layout
         initial={{ opacity: 0, y: -4 }}
         animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, height: 0 }}
+        exit={{ opacity: 0, height: 0, overflow: 'hidden' }}
         onClick={() => selectTask(isSelected ? null : task.id)}
         className={cn(
           'group flex items-start gap-3 px-3 py-3 rounded-[10px] select-none cursor-pointer',
@@ -89,12 +103,13 @@ export function TaskItem({ task, draggable = false, variant = 'row', dimmed = fa
         )}
         style={{ ...style, borderLeftColor: priority.color }}
       >
-        <button
+        <motion.button
           onClick={handleComplete}
+          animate={completing ? { scale: [1, 1.35, 0.85, 1] } : { scale: 1 }}
+          transition={{ duration: 0.28, ease: 'easeOut' }}
           className={cn(
-            'mt-0.5 shrink-0 w-[18px] h-[18px] rounded-full flex items-center justify-center transition-all',
+            'mt-0.5 shrink-0 w-[18px] h-[18px] rounded-full flex items-center justify-center transition-colors',
             'border-[1.5px]',
-            completing && 'animate-check-bounce',
             task.completed
               ? 'bg-[var(--accent)] border-[var(--accent)]'
               : 'border-[var(--border)] hover:border-[var(--accent)]',
@@ -105,7 +120,7 @@ export function TaskItem({ task, draggable = false, variant = 'row', dimmed = fa
               <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           )}
-        </button>
+        </motion.button>
 
         <div className="flex-1 min-w-0">
           <p className={cn(
@@ -155,8 +170,8 @@ export function TaskItem({ task, draggable = false, variant = 'row', dimmed = fa
       layout
       initial={{ opacity: 0, y: -4 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, height: 0 }}
-      onClick={() => selectTask(isSelected ? null : task.id)}
+      exit={{ opacity: 0, height: 0, overflow: 'hidden' }}
+      onClick={() => !editingTitle && selectTask(isSelected ? null : task.id)}
       className={cn(
         'group flex items-center gap-3 py-[10px] select-none cursor-pointer',
         'transition-colors duration-150',
@@ -169,12 +184,13 @@ export function TaskItem({ task, draggable = false, variant = 'row', dimmed = fa
       style={style}
     >
       {/* Checkbox */}
-      <button
+      <motion.button
         onClick={handleComplete}
+        animate={completing ? { scale: [1, 1.35, 0.85, 1] } : { scale: 1 }}
+        transition={{ duration: 0.28, ease: 'easeOut' }}
         className={cn(
-          'shrink-0 w-[18px] h-[18px] rounded-full flex items-center justify-center transition-all',
+          'shrink-0 w-[18px] h-[18px] rounded-full flex items-center justify-center transition-colors',
           'border-[1.5px]',
-          completing && 'animate-check-bounce',
           task.completed
             ? 'bg-[var(--accent)] border-[var(--accent)]'
             : 'border-[var(--border)] hover:border-[var(--accent)]',
@@ -185,16 +201,43 @@ export function TaskItem({ task, draggable = false, variant = 'row', dimmed = fa
             <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         )}
-      </button>
+      </motion.button>
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <p className={cn(
-          'text-[14.5px] font-medium text-[var(--text-primary)] truncate leading-snug tracking-[-0.1px]',
-          task.completed && 'line-through text-[var(--text-muted)]',
-        )}>
-          {task.title}
-        </p>
+        {editingTitle ? (
+          <input
+            autoFocus
+            value={titleValue}
+            onChange={(e) => setTitleValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') e.currentTarget.blur();
+              if (e.key === 'Escape') {
+                setTitleValue(task.title);
+                setEditingTitle(false);
+              }
+            }}
+            onBlur={handleTitleSave}
+            onClick={(e) => e.stopPropagation()}
+            className="w-full text-[14.5px] font-medium text-[var(--text-primary)] bg-transparent border-b border-[var(--accent)] focus:outline-none tracking-[-0.1px] leading-snug"
+          />
+        ) : (
+          <p
+            className={cn(
+              'text-[14.5px] font-medium text-[var(--text-primary)] truncate leading-snug tracking-[-0.1px]',
+              task.completed && 'line-through text-[var(--text-muted)]',
+            )}
+            onDoubleClick={(e) => {
+              e.stopPropagation();
+              if (!task.completed) {
+                setEditingTitle(true);
+                setTitleValue(task.title);
+              }
+            }}
+          >
+            {task.title}
+          </p>
+        )}
         <div className="flex items-center gap-2 mt-1 flex-wrap">
           {task.due_date && (
             <span className={cn(
@@ -226,9 +269,20 @@ export function TaskItem({ task, draggable = false, variant = 'row', dimmed = fa
             </span>
           )}
         </div>
+        {task.subtasks.length > 0 && (
+          <div className="mt-1.5 h-[3px] rounded-full bg-[var(--border)] overflow-hidden max-w-[120px]">
+            <div
+              className="h-full rounded-full transition-all duration-300"
+              style={{
+                width: `${(doneSubtasks / task.subtasks.length) * 100}%`,
+                backgroundColor: 'var(--accent)',
+              }}
+            />
+          </div>
+        )}
       </div>
 
-      {/* Right side: time + priority dot + hover actions */}
+      {/* Right side: priority dot + hover actions */}
       <div className="flex items-center gap-2 shrink-0">
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
