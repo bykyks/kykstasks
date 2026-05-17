@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
 import { useStore } from '../../store';
@@ -42,6 +42,20 @@ export function AppLayout() {
 
   const { showTaskForm, closeTaskForm, editingTaskId, selectedTaskId, selectTask, showSettings } = useStore();
 
+  const mainRef = useRef<HTMLElement>(null);
+  const savedScroll = useRef(0);
+
+  useEffect(() => {
+    if (showTaskForm) {
+      savedScroll.current = mainRef.current?.scrollTop ?? 0;
+    } else {
+      const el = mainRef.current;
+      if (el && savedScroll.current > 0) {
+        setTimeout(() => { el.scrollTop = savedScroll.current; }, 50);
+      }
+    }
+  }, [showTaskForm]);
+
   const toggleSidebarCollapse = () => {
     setSidebarCollapsed((c) => {
       const next = !c;
@@ -73,7 +87,7 @@ export function AppLayout() {
           onToggleSidebar={toggleSidebarCollapse}
         />
         <div className="flex-1 flex overflow-hidden">
-          <main className="flex-1 overflow-y-auto">
+          <main ref={mainRef} className="flex-1 overflow-y-auto">
             <MainContent />
           </main>
 
