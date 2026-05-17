@@ -108,20 +108,17 @@ export function Sidebar({ isOpen = false, onClose, collapsed = false, onToggleCo
       {/* App brand */}
       <div className={cn('pt-[22px] pb-4', collapsed ? 'px-2' : 'px-[18px]')}>
         <div className={cn('flex items-center', collapsed ? 'justify-center' : 'gap-2.5')}>
-          <img src="/icon.png" alt="Logo" className="w-[30px] h-[30px] rounded-[9px] object-contain shrink-0" />
-          {!collapsed && (
-            <>
-              <span className="font-bold text-[15px] text-[var(--text-primary)] tracking-[-0.3px]">Kykstasks</span>
-              {onToggleCollapse && (
-                <button
-                  onClick={onToggleCollapse}
-                  title="Réduire"
-                  className="ml-auto hidden md:flex p-1 rounded-[7px] text-[var(--text-muted)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-secondary)] transition-colors opacity-0 group-hover:opacity-100"
-                >
-                  <ChevronRight size={13} className="rotate-180" />
-                </button>
-              )}
-            </>
+          <div className="w-[30px] h-[30px] rounded-[9px] shrink-0 flex items-center justify-center" style={{ backgroundColor: '#d78a27' }}>
+            <img src="/icon.png" alt="Logo" className="w-[22px] h-[22px] object-contain" />
+          </div>
+          {!collapsed && onToggleCollapse && (
+            <button
+              onClick={onToggleCollapse}
+              title="Réduire"
+              className="ml-auto hidden md:flex p-1 rounded-[7px] text-[var(--text-muted)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-secondary)] transition-colors opacity-0 group-hover:opacity-100"
+            >
+              <ChevronRight size={13} className="rotate-180" />
+            </button>
           )}
         </div>
       </div>
