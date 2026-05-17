@@ -111,7 +111,6 @@ export function TopBar({ onMenuToggle, onToggleSidebar }: TopBarProps) {
       >
         <Plus size={15} />
         <span className="hidden sm:inline">Nouvelle tâche</span>
-        <span className="sm:hidden">+</span>
       </Button>
     </header>
   );

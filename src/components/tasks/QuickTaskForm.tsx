@@ -17,7 +17,9 @@ export function QuickTaskForm({ onClose }: QuickTaskFormProps) {
   const [projectId, setProjectId] = useState<string | null>(null);
   const [dueDate, setDueDate] = useState<string | null>(null);
   const [openPicker, setOpenPicker] = useState<'date' | 'priority' | 'project' | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const titleRef = useRef<HTMLInputElement>(null);
+  const closedRef = useRef(false);
 
   const priorityConfig = PRIORITY_CONFIG[priority];
   const selectedProject = projects.find((p) => p.id === projectId);
@@ -28,29 +30,39 @@ export function QuickTaskForm({ onClose }: QuickTaskFormProps) {
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') handleClose();
     };
     document.addEventListener('keydown', handleKey);
     return () => document.removeEventListener('keydown', handleKey);
   }, [onClose]);
 
+  const handleClose = () => {
+    if (closedRef.current) return;
+    closedRef.current = true;
+    onClose();
+  };
+
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
-    if (!title.trim()) return;
-    await createTask({
-      title: title.trim(),
-      notes,
-      priority,
-      project_id: projectId,
-      tags: [],
-      due_date: dueDate,
-      due_time: null,
-      recurrence: 'none',
-      recurrence_end: null,
-      kanban_status: 'todo',
-      reminder_minutes: null,
-    });
-    onClose();
+    if (!title.trim() || submitting) return;
+    setSubmitting(true);
+    try {
+      await createTask({
+        title: title.trim(),
+        notes,
+        priority,
+        project_id: projectId,
+        tags: [],
+        due_date: dueDate,
+        due_time: null,
+        recurrence: 'none',
+        recurrence_end: null,
+        kanban_status: 'todo',
+        reminder_minutes: null,
+      });
+    } finally {
+      handleClose();
+    }
   };
 
   const closePicker = () => setOpenPicker(null);
@@ -58,7 +70,7 @@ export function QuickTaskForm({ onClose }: QuickTaskFormProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4">
       {/* Backdrop */}
-      <div className="fixed inset-0 bg-black/25" onClick={onClose} />
+      <div className="fixed inset-0 bg-black/25" onClick={handleClose} />
 
       {/* Picker backdrop - closes any open picker */}
       {openPicker && (
@@ -223,7 +235,7 @@ export function QuickTaskForm({ onClose }: QuickTaskFormProps) {
           </span>
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             className="px-3 py-1.5 rounded-[8px] text-[13px] font-medium text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] transition-colors"
           >
             Annuler

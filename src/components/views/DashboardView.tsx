@@ -92,7 +92,7 @@ export function DashboardView() {
   const userInitial = userName ? userName[0].toUpperCase() : '?';
 
   return (
-    <div className="flex flex-col md:flex-row md:h-full overflow-y-auto md:overflow-hidden">
+    <div className="flex flex-col md:flex-row md:h-full md:overflow-hidden">
 
       {/* ══ COLONNE GAUCHE ══ */}
       <div className="order-2 md:order-none w-full md:w-72 md:shrink-0 border-t md:border-t-0 md:border-r border-[var(--border)] md:overflow-y-auto">
