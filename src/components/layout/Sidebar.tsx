@@ -17,9 +17,10 @@ interface NavItemProps {
   view: View;
   badge?: number;
   onClose?: () => void;
+  collapsed?: boolean;
 }
 
-function NavItem({ icon, label, view, badge, onClose }: NavItemProps) {
+function NavItem({ icon, label, view, badge, onClose, collapsed }: NavItemProps) {
   const { activeView, setView } = useStore();
   const isActive =
     typeof view === 'string'
@@ -27,6 +28,23 @@ function NavItem({ icon, label, view, badge, onClose }: NavItemProps) {
       : typeof activeView === 'object' &&
         activeView.type === (view as { type: string; id: string }).type &&
         (activeView as { type: string; id: string }).id === (view as { type: string; id: string }).id;
+
+  if (collapsed) {
+    return (
+      <button
+        title={label}
+        onClick={() => { setView(view); onClose?.(); }}
+        className={cn(
+          'w-full flex items-center justify-center py-2 rounded-[9px] transition-all duration-150',
+          isActive
+            ? 'bg-[var(--accent)] text-white'
+            : 'text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]',
+        )}
+      >
+        <span className="shrink-0">{icon}</span>
+      </button>
+    );
+  }
 
   return (
     <button
@@ -55,9 +73,11 @@ function NavItem({ icon, label, view, badge, onClose }: NavItemProps) {
 interface SidebarProps {
   isOpen?: boolean;
   onClose?: () => void;
+  collapsed?: boolean;
+  onToggleCollapse?: () => void;
 }
 
-export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
+export function Sidebar({ isOpen = false, onClose, collapsed = false, onToggleCollapse }: SidebarProps) {
   const { tasks, projects, tags, deleteProject, deleteTag, updateTag } = useStore();
   const [projectsOpen, setProjectsOpen] = useState(true);
   const [tagsOpen, setTagsOpen] = useState(true);
@@ -78,173 +98,224 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
 
   return (
     <aside className={cn(
-      'w-[228px] flex flex-col h-full bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)]',
-      'fixed inset-y-0 left-0 z-40 transition-transform duration-300 ease-in-out',
+      'flex flex-col h-full bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)]',
+      'fixed inset-y-0 left-0 z-40 transition-[width,transform] duration-200 ease-in-out',
       'md:relative md:translate-x-0 md:z-auto',
       isOpen ? 'translate-x-0' : '-translate-x-full',
+      collapsed ? 'w-[52px]' : 'w-[228px]',
     )}>
+
       {/* App brand */}
-      <div className="px-[18px] pt-[22px] pb-4">
-        <div className="flex items-center gap-2.5">
+      <div className={cn('pt-[22px] pb-4', collapsed ? 'px-2' : 'px-[18px]')}>
+        <div className={cn('flex items-center', collapsed ? 'justify-center' : 'gap-2.5')}>
           <div className="w-[30px] h-[30px] rounded-[9px] bg-[var(--accent)] flex items-center justify-center shrink-0">
             <Zap size={14} color="white" fill="white" />
           </div>
-          <span className="font-bold text-[15px] text-[var(--text-primary)] tracking-[-0.3px]">Kykstasks</span>
+          {!collapsed && (
+            <>
+              <span className="font-bold text-[15px] text-[var(--text-primary)] tracking-[-0.3px]">Kykstasks</span>
+              {onToggleCollapse && (
+                <button
+                  onClick={onToggleCollapse}
+                  title="Réduire"
+                  className="ml-auto hidden md:flex p-1 rounded-[7px] text-[var(--text-muted)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-secondary)] transition-colors opacity-0 group-hover:opacity-100"
+                >
+                  <ChevronRight size={13} className="rotate-180" />
+                </button>
+              )}
+            </>
+          )}
         </div>
       </div>
 
       {/* Quick add */}
-      <div className="px-3 pb-4">
-        <Button
-          variant="primary"
-          size="lg"
-          className="w-full justify-start gap-2 text-[13px] font-semibold rounded-[10px]"
-          onClick={() => { useStore.getState().openTaskForm(); onClose?.(); }}
-        >
-          <Plus size={16} />
-          Nouvelle tâche
-        </Button>
+      <div className={cn('pb-4', collapsed ? 'px-2' : 'px-3')}>
+        {collapsed ? (
+          <button
+            title="Nouvelle tâche"
+            onClick={() => { useStore.getState().openTaskForm(); onClose?.(); }}
+            className="w-full flex items-center justify-center py-2 rounded-[10px] bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] transition-colors"
+          >
+            <Plus size={16} />
+          </button>
+        ) : (
+          <Button
+            variant="primary"
+            size="lg"
+            className="w-full justify-start gap-2 text-[13px] font-semibold rounded-[10px]"
+            onClick={() => { useStore.getState().openTaskForm(); onClose?.(); }}
+          >
+            <Plus size={16} />
+            Nouvelle tâche
+          </Button>
+        )}
       </div>
 
-      <nav className="flex-1 overflow-y-auto px-2 py-0 flex flex-col gap-px">
-        {/* Core views */}
-        <NavItem icon={<LayoutDashboard size={14} />} label="Accueil" view="dashboard" onClose={onClose} />
-        <NavItem icon={<Sun size={14} />} label="Aujourd'hui" view="today" badge={todayCount} onClose={onClose} />
-        <NavItem icon={<Calendar size={14} />} label="À venir" view="upcoming" onClose={onClose} />
-        <NavItem icon={<List size={14} />} label="Tâches" view="all" onClose={onClose} />
-        <NavItem icon={<KanbanSquare size={14} />} label="Tableau" view="kanban" onClose={onClose} />
-        <NavItem icon={<BarChart2 size={14} />} label="Statistiques" view="stats" onClose={onClose} />
+      <nav className="flex-1 overflow-y-auto px-2 py-0 flex flex-col gap-px overflow-x-hidden">
+        <NavItem icon={<LayoutDashboard size={14} />} label="Accueil" view="dashboard" onClose={onClose} collapsed={collapsed} />
+        <NavItem icon={<Sun size={14} />} label="Aujourd'hui" view="today" badge={collapsed ? undefined : todayCount} onClose={onClose} collapsed={collapsed} />
+        <NavItem icon={<Calendar size={14} />} label="À venir" view="upcoming" onClose={onClose} collapsed={collapsed} />
+        <NavItem icon={<List size={14} />} label="Tâches" view="all" onClose={onClose} collapsed={collapsed} />
+        <NavItem icon={<KanbanSquare size={14} />} label="Tableau" view="kanban" onClose={onClose} collapsed={collapsed} />
+        <NavItem icon={<BarChart2 size={14} />} label="Statistiques" view="stats" onClose={onClose} collapsed={collapsed} />
 
-        <div className="h-px bg-[var(--sidebar-border)] mx-1 my-3.5" />
+        {!collapsed && (
+          <>
+            <div className="h-px bg-[var(--sidebar-border)] mx-1 my-3.5" />
 
-        {/* Projects */}
-        <div>
-          <button
-            onClick={() => setProjectsOpen((o) => !o)}
-            className="w-full flex items-center gap-1.5 px-[11px] py-[6px] text-[10px] font-bold
-                       text-[var(--text-muted)] uppercase tracking-[0.09em] hover:text-[var(--text-secondary)]"
-          >
-            {projectsOpen ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
-            Projets
-            <span className="ml-auto">
+            {/* Projects */}
+            <div>
               <button
-                onClick={(e) => { e.stopPropagation(); setShowProjectForm(true); }}
-                className="p-0.5 hover:text-[var(--accent)] rounded transition-colors"
+                onClick={() => setProjectsOpen((o) => !o)}
+                className="w-full flex items-center gap-1.5 px-[11px] py-[6px] text-[10px] font-bold
+                           text-[var(--text-muted)] uppercase tracking-[0.09em] hover:text-[var(--text-secondary)]"
               >
-                <Plus size={12} />
-              </button>
-            </span>
-          </button>
-          {projectsOpen && (
-            <div className="mt-0.5 flex flex-col gap-px">
-              {projects.map((p) => (
-                <div key={p.id} className="group relative">
-                  <NavItem
-                    icon={
-                      <span style={{ color: p.color }}>
-                        {getIcon(p.icon, 14)}
-                      </span>
-                    }
-                    label={p.name}
-                    view={{ type: 'project', id: p.id }}
-                    badge={tasks.filter((t) => !t.completed && t.project_id === p.id).length || undefined}
-                    onClose={onClose}
-                  />
+                {projectsOpen ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
+                Projets
+                <span className="ml-auto">
                   <button
-                    onClick={() => deleteProject(p.id)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg
-                               opacity-0 group-hover:opacity-100 text-[var(--text-muted)]
-                               hover:text-red-500 hover:bg-red-500/10 transition-all"
+                    onClick={(e) => { e.stopPropagation(); setShowProjectForm(true); }}
+                    className="p-0.5 hover:text-[var(--accent)] rounded transition-colors"
                   >
-                    <Trash2 size={12} />
+                    <Plus size={12} />
                   </button>
-                </div>
-              ))}
-              {projects.length === 0 && (
-                <p className="px-[11px] py-2 text-[13px] text-[var(--text-muted)]">Aucun projet</p>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Tags */}
-        <div className="mt-1">
-          <button
-            onClick={() => setTagsOpen((o) => !o)}
-            className="w-full flex items-center gap-1.5 px-[11px] py-[6px] text-[10px] font-bold
-                       text-[var(--text-muted)] uppercase tracking-[0.09em] hover:text-[var(--text-secondary)]"
-          >
-            {tagsOpen ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
-            Étiquettes
-          </button>
-          {tagsOpen && (
-            <div className="mt-0.5 flex flex-col gap-px">
-              {tags.map((tag) => (
-                <div key={tag.id} className="group relative">
-                  {editingTagId === tag.id ? (
-                    <div className="flex items-center gap-2.5 px-[11px] py-2">
-                      <Tag size={14} style={{ color: tag.color }} className="shrink-0" />
-                      <input
-                        autoFocus
-                        value={editingTagName}
-                        onChange={(e) => setEditingTagName(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') handleSaveTagName(tag.id);
-                          if (e.key === 'Escape') setEditingTagId(null);
-                        }}
-                        onBlur={() => handleSaveTagName(tag.id)}
-                        className="flex-1 text-[13px] bg-transparent border-b-2 border-[var(--accent)]
-                                   text-[var(--text-primary)] focus:outline-none"
-                      />
-                    </div>
-                  ) : (
-                    <>
+                </span>
+              </button>
+              {projectsOpen && (
+                <div className="mt-0.5 flex flex-col gap-px">
+                  {projects.map((p) => (
+                    <div key={p.id} className="group relative">
                       <NavItem
-                        icon={<Tag size={14} style={{ color: tag.color }} />}
-                        label={tag.name}
-                        view={{ type: 'tag', id: tag.id }}
+                        icon={
+                          <span style={{ color: p.color }}>
+                            {getIcon(p.icon, 14)}
+                          </span>
+                        }
+                        label={p.name}
+                        view={{ type: 'project', id: p.id }}
+                        badge={tasks.filter((t) => !t.completed && t.project_id === p.id).length || undefined}
                         onClose={onClose}
                       />
-                      <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-0.5
-                                      opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setEditingTagId(tag.id);
-                            setEditingTagName(tag.name);
-                          }}
-                          className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--accent)] hover:bg-[var(--surface-active)] transition-all"
-                        >
-                          <Pencil size={11} />
-                        </button>
-                        <button
-                          onClick={() => deleteTag(tag.id)}
-                          className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10 transition-all"
-                        >
-                          <Trash2 size={12} />
-                        </button>
-                      </div>
-                    </>
+                      <button
+                        onClick={() => deleteProject(p.id)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg
+                                   opacity-0 group-hover:opacity-100 text-[var(--text-muted)]
+                                   hover:text-red-500 hover:bg-red-500/10 transition-all"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+                  ))}
+                  {projects.length === 0 && (
+                    <p className="px-[11px] py-2 text-[13px] text-[var(--text-muted)]">Aucun projet</p>
                   )}
                 </div>
-              ))}
+              )}
             </div>
-          )}
-        </div>
+
+            {/* Tags */}
+            <div className="mt-1">
+              <button
+                onClick={() => setTagsOpen((o) => !o)}
+                className="w-full flex items-center gap-1.5 px-[11px] py-[6px] text-[10px] font-bold
+                           text-[var(--text-muted)] uppercase tracking-[0.09em] hover:text-[var(--text-secondary)]"
+              >
+                {tagsOpen ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
+                Étiquettes
+              </button>
+              {tagsOpen && (
+                <div className="mt-0.5 flex flex-col gap-px">
+                  {tags.map((tag) => (
+                    <div key={tag.id} className="group relative">
+                      {editingTagId === tag.id ? (
+                        <div className="flex items-center gap-2.5 px-[11px] py-2">
+                          <Tag size={14} style={{ color: tag.color }} className="shrink-0" />
+                          <input
+                            autoFocus
+                            value={editingTagName}
+                            onChange={(e) => setEditingTagName(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') handleSaveTagName(tag.id);
+                              if (e.key === 'Escape') setEditingTagId(null);
+                            }}
+                            onBlur={() => handleSaveTagName(tag.id)}
+                            className="flex-1 text-[13px] bg-transparent border-b-2 border-[var(--accent)]
+                                       text-[var(--text-primary)] focus:outline-none"
+                          />
+                        </div>
+                      ) : (
+                        <>
+                          <NavItem
+                            icon={<Tag size={14} style={{ color: tag.color }} />}
+                            label={tag.name}
+                            view={{ type: 'tag', id: tag.id }}
+                            onClose={onClose}
+                          />
+                          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-0.5
+                                          opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditingTagId(tag.id);
+                                setEditingTagName(tag.name);
+                              }}
+                              className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--accent)] hover:bg-[var(--surface-active)] transition-all"
+                            >
+                              <Pencil size={11} />
+                            </button>
+                            <button
+                              onClick={() => deleteTag(tag.id)}
+                              className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10 transition-all"
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        {collapsed && <div className="h-px bg-[var(--sidebar-border)] mx-1 my-3" />}
       </nav>
 
-      {/* Bottom — Settings */}
-      <div className="px-2 py-2.5 border-t border-[var(--sidebar-border)]">
-        <button
-          onClick={() => { useStore.getState().toggleSettings(); onClose?.(); }}
-          className="w-full flex items-center gap-2.5 px-[11px] py-2 rounded-[9px] text-[13.5px] font-medium
-                     text-[var(--text-secondary)] hover:bg-[var(--surface-hover)]
-                     hover:text-[var(--text-primary)] transition-colors"
-        >
-          <Settings size={14} />
-          Paramètres
-          <span className="ml-auto text-[11px] text-[var(--text-muted)]">⌘,</span>
-        </button>
+      {/* Bottom — Settings + collapse toggle */}
+      <div className={cn('border-t border-[var(--sidebar-border)]', collapsed ? 'px-2 py-2' : 'px-2 py-2.5')}>
+        {collapsed ? (
+          <>
+            <button
+              title="Paramètres"
+              onClick={() => { useStore.getState().toggleSettings(); onClose?.(); }}
+              className="w-full flex items-center justify-center py-2 rounded-[9px] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] transition-colors mb-1"
+            >
+              <Settings size={14} />
+            </button>
+            {onToggleCollapse && (
+              <button
+                title="Développer"
+                onClick={onToggleCollapse}
+                className="w-full flex items-center justify-center py-2 rounded-[9px] text-[var(--text-muted)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-secondary)] transition-colors"
+              >
+                <ChevronRight size={14} />
+              </button>
+            )}
+          </>
+        ) : (
+          <button
+            onClick={() => { useStore.getState().toggleSettings(); onClose?.(); }}
+            className="w-full flex items-center gap-2.5 px-[11px] py-2 rounded-[9px] text-[13.5px] font-medium
+                       text-[var(--text-secondary)] hover:bg-[var(--surface-hover)]
+                       hover:text-[var(--text-primary)] transition-colors"
+          >
+            <Settings size={14} />
+            Paramètres
+            <span className="ml-auto text-[11px] text-[var(--text-muted)]">⌘,</span>
+          </button>
+        )}
       </div>
 
       <ProjectForm open={showProjectForm} onClose={() => setShowProjectForm(false)} />

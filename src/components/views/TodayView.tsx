@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { List, LayoutGrid } from 'lucide-react';
 import { useStore } from '../../store';
 import { TaskList } from '../tasks/TaskList';
 import { isOverdue, isToday } from '../../lib/utils';
 import type { Task } from '../../types';
+import { cn } from '../../lib/utils';
 
 const DAY_NAMES = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
 const MONTH_NAMES = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
@@ -38,6 +40,14 @@ function SectionLabel({ color, label }: { color: string; label: string }) {
 export function TodayView() {
   const tasks = useStore((s) => s.tasks);
   const [sort, setSort] = useState<SortKey>('default');
+  const [viewMode, setViewMode] = useState<'list' | 'cards'>(() =>
+    (localStorage.getItem('view-mode-today') ?? 'list') as 'list' | 'cards',
+  );
+
+  const setViewModeAndPersist = (m: 'list' | 'cards') => {
+    setViewMode(m);
+    localStorage.setItem('view-mode-today', m);
+  };
 
   const overdue = sortTasks(
     tasks.filter((t) => !t.completed && t.due_date && isOverdue(t.due_date) && !isToday(t.due_date)),
@@ -56,6 +66,8 @@ export function TodayView() {
   const dayNum = now.getDate();
   const monthName = MONTH_NAMES[now.getMonth()];
 
+  const variant = viewMode === 'cards' ? 'card' : 'row';
+
   return (
     <div className="px-12 py-9">
       {/* Header */}
@@ -69,47 +81,76 @@ export function TodayView() {
           </p>
         </div>
 
-        {/* Sort */}
-        <div className="flex items-center gap-2 pb-0.5">
-          <span className="text-[12px] text-[var(--text-muted)]">Trier par</span>
-          <select
-            value={sort}
-            onChange={(e) => setSort(e.target.value as SortKey)}
-            className="bg-[var(--bg)] border border-[var(--border)] rounded-[7px] px-2.5 py-1
-                       text-[var(--text-secondary)] text-[12px] font-medium focus:outline-none
-                       focus:border-[var(--accent)] cursor-pointer transition-colors"
-          >
-            <option value="default">Par défaut</option>
-            <option value="priority">Priorité</option>
-            <option value="date">Date</option>
-            <option value="title">Titre</option>
-          </select>
+        <div className="flex items-center gap-3 pb-0.5">
+          {/* View mode toggle */}
+          <div className="flex items-center gap-[3px] bg-[var(--bg)] border border-[var(--border)] rounded-[9px] p-[3px]">
+            <button
+              onClick={() => setViewModeAndPersist('list')}
+              className={cn(
+                'p-[5px] rounded-[6px] transition-colors',
+                viewMode === 'list'
+                  ? 'bg-[var(--surface)] text-[var(--text-primary)] shadow-sm'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]',
+              )}
+            >
+              <List size={13} />
+            </button>
+            <button
+              onClick={() => setViewModeAndPersist('cards')}
+              className={cn(
+                'p-[5px] rounded-[6px] transition-colors',
+                viewMode === 'cards'
+                  ? 'bg-[var(--surface)] text-[var(--text-primary)] shadow-sm'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]',
+              )}
+            >
+              <LayoutGrid size={13} />
+            </button>
+          </div>
+
+          {/* Sort */}
+          <div className="flex items-center gap-2">
+            <span className="text-[12px] text-[var(--text-muted)]">Trier par</span>
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value as SortKey)}
+              className="bg-[var(--bg)] border border-[var(--border)] rounded-[7px] px-2.5 py-1
+                         text-[var(--text-secondary)] text-[12px] font-medium focus:outline-none
+                         focus:border-[var(--accent)] cursor-pointer transition-colors"
+            >
+              <option value="default">Par défaut</option>
+              <option value="priority">Priorité</option>
+              <option value="date">Date</option>
+              <option value="title">Titre</option>
+            </select>
+          </div>
         </div>
       </div>
 
       {overdue.length > 0 && (
         <section className="mb-8">
           <SectionLabel color="#EF4444" label={`En retard · ${overdue.length}`} />
-          <TaskList tasks={overdue} draggable={sort === 'default'} />
+          <TaskList tasks={overdue} draggable={sort === 'default'} variant={variant} />
         </section>
       )}
 
       <section className="mb-8">
         <SectionLabel
           color="var(--accent)"
-          label={`Aujourd'hui${today.length > 0 ? ` · ${today.length}` : ''}`}
+          label={`À faire${today.length > 0 ? ` · ${today.length}` : ''}`}
         />
         <TaskList
           tasks={today}
           draggable={sort === 'default'}
           emptyMessage={overdue.length === 0 ? "Tout est à jour ! 🎉" : "Aucune tâche pour aujourd'hui"}
+          variant={variant}
         />
       </section>
 
       {completed.length > 0 && (
         <section>
           <SectionLabel color="var(--text-muted)" label={`Terminées · ${completed.length}`} />
-          <TaskList tasks={completed} draggable={false} />
+          <TaskList tasks={completed} draggable={false} variant={variant} />
         </section>
       )}
     </div>

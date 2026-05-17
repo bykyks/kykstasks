@@ -1,16 +1,17 @@
 import React from 'react';
-import { Search, Plus, Sun, Moon, Monitor, Menu } from 'lucide-react';
+import { Search, Plus, Sun, Moon, Monitor, Menu, PanelLeft } from 'lucide-react';
 import { useStore } from '../../store';
 import { Button } from '../ui/Button';
 import type { View, Theme } from '../../types';
 
 const VIEW_LABELS: Record<string, string> = {
-  dashboard: 'Dashboard',
+  dashboard: 'Accueil',
   today: "Aujourd'hui",
   upcoming: 'À venir',
-  all: 'Toutes les tâches',
+  all: 'Tâches',
   search: 'Recherche',
-  kanban: 'Kanban',
+  kanban: 'Tableau',
+  stats: 'Statistiques',
 };
 
 function viewLabel(view: View): string {
@@ -42,9 +43,10 @@ function ThemeToggle() {
 
 interface TopBarProps {
   onMenuToggle?: () => void;
+  onToggleSidebar?: () => void;
 }
 
-export function TopBar({ onMenuToggle }: TopBarProps) {
+export function TopBar({ onMenuToggle, onToggleSidebar }: TopBarProps) {
   const { activeView, searchQuery, setSearchQuery, setView, openTaskForm } = useStore();
 
   return (
@@ -57,6 +59,18 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
       >
         <Menu size={20} />
       </button>
+
+      {/* Sidebar toggle - desktop only */}
+      {onToggleSidebar && (
+        <button
+          className="hidden md:flex p-2 rounded-[9px] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] transition-colors"
+          onClick={onToggleSidebar}
+          aria-label="Réduire/développer le menu"
+          title="Réduire/développer le menu"
+        >
+          <PanelLeft size={17} />
+        </button>
+      )}
 
       {/* Title */}
       <h1 className="text-[17px] font-bold text-[var(--text-primary)] min-w-0 truncate tracking-[-0.4px]">

@@ -4,7 +4,7 @@ import { Calendar, Tag, Repeat, Trash2, Pencil } from 'lucide-react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useStore } from '../../store';
-import type { Task } from '../../types';
+import type { Task, Priority } from '../../types';
 import { PRIORITY_CONFIG } from '../../types';
 import { Badge } from '../ui/Badge';
 import { cn, formatDate, isOverdue } from '../../lib/utils';
@@ -18,9 +18,11 @@ interface TaskItemProps {
 
 export function TaskItem({ task, draggable = false, variant = 'row', dimmed = false }: TaskItemProps) {
   const { toggleTask, deleteTask, selectTask, selectedTaskId, openTaskForm, tags, updateTask } = useStore();
+  const projects = useStore((s) => s.projects);
   const [completing, setCompleting] = useState(false);
   const [editingTitle, setEditingTitle] = useState(false);
   const [titleValue, setTitleValue] = useState(task.title);
+  const [openBadge, setOpenBadge] = useState<'priority' | 'date' | null>(null);
   const isSelected = selectedTaskId === task.id;
   const priority = PRIORITY_CONFIG[task.priority];
   const overdue = isOverdue(task.due_date) && !task.completed;
@@ -162,7 +164,7 @@ export function TaskItem({ task, draggable = false, variant = 'row', dimmed = fa
     );
   }
 
-  /* ── ROW variant (default — Today, Upcoming, AllTasks, Project) ─────────── */
+  /* ── ROW variant ─────────────────────────────────────────────────────────── */
   return (
     <motion.div
       ref={setNodeRef}
@@ -282,15 +284,99 @@ export function TaskItem({ task, draggable = false, variant = 'row', dimmed = fa
         )}
       </div>
 
-      {/* Right side: priority dot + hover actions */}
-      <div className="flex items-center gap-2 shrink-0">
+      {/* Right side: inline badges (hover) + priority dot */}
+      <div className="flex items-center gap-1 shrink-0">
+        {/* Backdrop to close open badge on outside click */}
+        {openBadge && (
+          <div className="fixed inset-0 z-40" onClick={(e) => { e.stopPropagation(); setOpenBadge(null); }} />
+        )}
+
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          {/* Date badge */}
+          {!task.completed && (
+            <div className="relative">
+              <button
+                onClick={(e) => { e.stopPropagation(); setOpenBadge(openBadge === 'date' ? null : 'date'); }}
+                className={cn(
+                  'flex items-center gap-[5px] px-2 py-[3px] rounded-[6px] text-[11px] font-medium border transition-colors',
+                  task.due_date
+                    ? overdue
+                      ? 'text-red-500 border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-900/20'
+                      : 'text-[var(--text-muted)] border-[var(--border)] hover:border-[var(--accent)]/50'
+                    : 'text-[var(--text-muted)] border-[var(--border)] hover:border-[var(--accent)]/50',
+                )}
+              >
+                <Calendar size={10} />
+                {task.due_date ? formatDate(task.due_date) : 'Date'}
+              </button>
+              {openBadge === 'date' && (
+                <div className="absolute right-0 top-full mt-1 z-50 bg-[var(--surface)] border border-[var(--border)] rounded-[10px] shadow-lg p-3 min-w-[180px]">
+                  <input
+                    type="date"
+                    defaultValue={task.due_date ?? ''}
+                    onChange={(e) => {
+                      updateTask({ id: task.id, due_date: e.target.value || null });
+                      setOpenBadge(null);
+                    }}
+                    autoFocus
+                    className="w-full text-[12px] bg-[var(--surface-hover)] border border-[var(--border)] rounded-[7px] px-2.5 py-1.5 text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)]"
+                  />
+                  {task.due_date && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); updateTask({ id: task.id, due_date: null }); setOpenBadge(null); }}
+                      className="mt-1.5 w-full text-[11.5px] text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10 py-1 rounded-[7px] transition-colors"
+                    >
+                      Effacer la date
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Priority badge */}
+          {!task.completed && (
+            <div className="relative">
+              <button
+                onClick={(e) => { e.stopPropagation(); setOpenBadge(openBadge === 'priority' ? null : 'priority'); }}
+                className="flex items-center gap-[5px] px-2 py-[3px] rounded-[6px] text-[11px] font-medium border border-transparent hover:border-[var(--border)] transition-colors"
+                style={{ color: priority.color }}
+              >
+                <span className="w-[6px] h-[6px] rounded-full" style={{ backgroundColor: priority.color }} />
+                {priority.label}
+              </button>
+              {openBadge === 'priority' && (
+                <div className="absolute right-0 top-full mt-1 z-50 bg-[var(--surface)] border border-[var(--border)] rounded-[10px] shadow-lg p-1.5 min-w-[130px]">
+                  {(Object.entries(PRIORITY_CONFIG) as [Priority, typeof PRIORITY_CONFIG[Priority]][]).map(([p, cfg]) => (
+                    <button
+                      key={p}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        updateTask({ id: task.id, priority: p });
+                        setOpenBadge(null);
+                      }}
+                      className={cn(
+                        'w-full flex items-center gap-2 px-2.5 py-[7px] rounded-[7px] text-[12px] font-medium transition-colors text-left',
+                        task.priority === p ? 'bg-[var(--surface-active)]' : 'hover:bg-[var(--surface-hover)]',
+                      )}
+                    >
+                      <span className="w-[7px] h-[7px] rounded-full shrink-0" style={{ backgroundColor: cfg.color }} />
+                      <span style={{ color: cfg.color }}>{cfg.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Pencil */}
           <button
             onClick={(e) => { e.stopPropagation(); openTaskForm(task.id); }}
             className="p-1.5 rounded-lg hover:bg-[var(--surface-active)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
           >
             <Pencil size={13} />
           </button>
+          {/* Trash */}
           <button
             onClick={(e) => { e.stopPropagation(); deleteTask(task.id); }}
             className="p-1.5 rounded-lg hover:bg-red-500/10 text-[var(--text-muted)] hover:text-red-500 transition-colors"
@@ -298,11 +384,10 @@ export function TaskItem({ task, draggable = false, variant = 'row', dimmed = fa
             <Trash2 size={13} />
           </button>
         </div>
-        {task.due_time && !task.due_date && (
-          <span className="text-[12px] font-medium text-[var(--text-muted)]">{task.due_time}</span>
-        )}
+
+        {/* Priority dot — hidden on hover */}
         <span
-          className="w-[7px] h-[7px] rounded-full shrink-0"
+          className="w-[7px] h-[7px] rounded-full shrink-0 group-hover:opacity-0 transition-opacity"
           style={{ backgroundColor: priority.color }}
         />
       </div>

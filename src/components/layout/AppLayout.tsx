@@ -12,6 +12,7 @@ import { ProjectView } from '../views/ProjectView';
 import { TagView } from '../views/TagView';
 import { StatsView } from '../views/StatsView';
 import { TaskForm } from '../tasks/TaskForm';
+import { QuickTaskForm } from '../tasks/QuickTaskForm';
 import { TaskDetail } from '../tasks/TaskDetail';
 import { SettingsPanel } from '../settings/SettingsPanel';
 import { QuickAdd } from '../ui/QuickAdd';
@@ -35,7 +36,19 @@ function MainContent() {
 
 export function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { showTaskForm, closeTaskForm, selectedTaskId, selectTask, showSettings } = useStore();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() =>
+    localStorage.getItem('sidebar-collapsed') === 'true',
+  );
+
+  const { showTaskForm, closeTaskForm, editingTaskId, selectedTaskId, selectTask, showSettings } = useStore();
+
+  const toggleSidebarCollapse = () => {
+    setSidebarCollapsed((c) => {
+      const next = !c;
+      localStorage.setItem('sidebar-collapsed', String(next));
+      return next;
+    });
+  };
 
   return (
     <div className="flex h-screen bg-[var(--bg)] overflow-hidden">
@@ -47,10 +60,18 @@ export function AppLayout() {
         />
       )}
 
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <Sidebar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        collapsed={sidebarCollapsed}
+        onToggleCollapse={toggleSidebarCollapse}
+      />
 
       <div className="flex-1 flex flex-col min-w-0">
-        <TopBar onMenuToggle={() => setSidebarOpen((o) => !o)} />
+        <TopBar
+          onMenuToggle={() => setSidebarOpen((o) => !o)}
+          onToggleSidebar={toggleSidebarCollapse}
+        />
         <div className="flex-1 flex overflow-hidden">
           <main className="flex-1 overflow-y-auto">
             <MainContent />
@@ -67,7 +88,11 @@ export function AppLayout() {
         </div>
       </div>
 
-      <TaskForm open={showTaskForm} onClose={closeTaskForm} />
+      {showTaskForm && (
+        editingTaskId
+          ? <TaskForm open={true} onClose={closeTaskForm} />
+          : <QuickTaskForm onClose={closeTaskForm} />
+      )}
       {showSettings && <SettingsPanel />}
       <QuickAdd />
     </div>
