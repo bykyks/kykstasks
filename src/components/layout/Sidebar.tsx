@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   Sun, Calendar, List, KanbanSquare, Tag, Plus, Settings,
-  ChevronDown, ChevronRight, Trash2, Zap, Pencil, LayoutDashboard, BarChart2,
+  ChevronDown, ChevronRight, Trash2, Pencil, LayoutDashboard, BarChart2,
 } from 'lucide-react';
 import { useStore } from '../../store';
 import type { View } from '../../types';
@@ -108,9 +108,7 @@ export function Sidebar({ isOpen = false, onClose, collapsed = false, onToggleCo
       {/* App brand */}
       <div className={cn('pt-[22px] pb-4', collapsed ? 'px-2' : 'px-[18px]')}>
         <div className={cn('flex items-center', collapsed ? 'justify-center' : 'gap-2.5')}>
-          <div className="w-[30px] h-[30px] rounded-[9px] bg-[var(--accent)] flex items-center justify-center shrink-0">
-            <Zap size={14} color="white" fill="white" />
-          </div>
+          <img src="/icon.png" alt="Logo" className="w-[30px] h-[30px] rounded-[9px] object-contain shrink-0" />
           {!collapsed && (
             <>
               <span className="font-bold text-[15px] text-[var(--text-primary)] tracking-[-0.3px]">Kykstasks</span>
