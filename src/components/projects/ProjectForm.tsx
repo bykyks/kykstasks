@@ -13,7 +13,7 @@ interface ProjectFormProps {
 export function ProjectForm({ open, onClose }: ProjectFormProps) {
   const createProject = useStore((s) => s.createProject);
   const [name, setName] = useState('');
-  const [color, setColor] = useState('#6366f1');
+  const [color, setColor] = useState('#d78a27');
   const [icon, setIcon] = useState('folder');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -21,7 +21,7 @@ export function ProjectForm({ open, onClose }: ProjectFormProps) {
     if (!name.trim()) return;
     await createProject({ name: name.trim(), color, icon });
     setName('');
-    setColor('#6366f1');
+    setColor('#d78a27');
     setIcon('folder');
     onClose();
   };

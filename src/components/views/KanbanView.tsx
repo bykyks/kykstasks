@@ -19,7 +19,7 @@ import { TaskItem } from '../tasks/TaskItem';
 import { Plus } from 'lucide-react';
 
 const COLUMNS: { id: KanbanStatus; label: string; color: string }[] = [
-  { id: 'todo',        label: 'À faire',  color: '#4F6EF7' },
+  { id: 'todo',        label: 'À faire',  color: '#d78a27' },
   { id: 'in_progress', label: 'En cours', color: '#F97316' },
   { id: 'done',        label: 'Terminé',  color: '#22C55E' },
 ];

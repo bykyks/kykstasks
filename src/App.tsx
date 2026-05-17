@@ -19,7 +19,7 @@ function AppInner() {
 
 const Spinner = () => (
   <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', background: '#1a1a2e', flexDirection: 'column', gap: 12 }}>
-    <div style={{ width: 48, height: 48, borderRadius: 12, background: '#6366f1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div style={{ width: 48, height: 48, borderRadius: 12, background: '#d78a27', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
         <path d="M13 2L4.09 12.26a1 1 0 00.91 1.74H11v8l8.91-10.26a1 1 0 00-.91-1.74H13V2z" />
       </svg>
@@ -53,7 +53,7 @@ export default function App() {
   if (isLoading) {
     return (
       <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', background: '#1a1a2e', flexDirection: 'column', gap: 12 }}>
-        <div style={{ width: 48, height: 48, borderRadius: 12, background: '#6366f1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: 48, height: 48, borderRadius: 12, background: '#d78a27', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
             <path d="M13 2L4.09 12.26a1 1 0 00.91 1.74H11v8l8.91-10.26a1 1 0 00-.91-1.74H13V2z" />
           </svg>

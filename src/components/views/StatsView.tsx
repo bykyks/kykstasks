@@ -69,7 +69,7 @@ export function StatsView() {
           icon={<CheckCircle2 size={15} />}
           label="Terminées"
           value={stats.totalCompleted}
-          color="#4F6EF7"
+          color="#d78a27"
         />
         <StatCard
           icon={<Target size={15} />}
@@ -127,7 +127,7 @@ export function StatsView() {
                 'Terminées',
               ]}
             />
-            <Bar dataKey="count" fill="#4F6EF7" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="count" fill="#d78a27" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>

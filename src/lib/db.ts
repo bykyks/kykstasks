@@ -274,7 +274,7 @@ export async function createProject(input: {
     .insert({
       user_id: userId,
       name: input.name,
-      color: input.color ?? '#6366f1',
+      color: input.color ?? '#d78a27',
       icon: input.icon ?? 'folder',
       position,
     })
@@ -343,7 +343,7 @@ export async function createTag(input: {
     .insert({
       user_id: userId,
       name: input.name,
-      color: input.color ?? '#6366f1',
+      color: input.color ?? '#d78a27',
     })
     .select()
     .single();
