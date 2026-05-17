@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Check, Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import { useStore } from '../../store';
 import { PRIORITY_CONFIG } from '../../types';
 import { cn, isOverdue, isToday } from '../../lib/utils';
@@ -92,10 +92,10 @@ export function DashboardView() {
   const userInitial = userName ? userName[0].toUpperCase() : '?';
 
   return (
-    <div className="h-full flex overflow-hidden">
+    <div className="flex flex-col md:flex-row md:h-full overflow-y-auto md:overflow-hidden">
 
       {/* ══ COLONNE GAUCHE ══ */}
-      <div className="w-72 shrink-0 border-r border-[var(--border)] overflow-y-auto">
+      <div className="order-2 md:order-none w-full md:w-72 md:shrink-0 border-t md:border-t-0 md:border-r border-[var(--border)] md:overflow-y-auto">
         <div className="p-5 space-y-6">
 
           {/* Épinglés */}
@@ -169,20 +169,10 @@ export function DashboardView() {
               )}
             </div>
 
-            <button
-              onClick={() => openTaskForm()}
-              className="mt-3 w-full flex items-center gap-2 px-4 py-2.5 rounded-xl
-                         border-2 border-dashed border-[var(--border)] text-sm font-medium
-                         text-[var(--text-muted)] hover:border-[var(--accent)]/50
-                         hover:text-[var(--accent)] transition-all"
-            >
-              <Plus size={15} />
-              Nouvelle tâche
-            </button>
           </div>
 
-          {/* Mini calendrier */}
-          <div>
+          {/* Mini calendrier — desktop uniquement */}
+          <div className="hidden md:block">
             <div className="flex items-center justify-between mb-3">
               <span className="text-sm font-bold text-[var(--text-primary)]">
                 {MONTH_CAP[calMonth.getMonth()]}, {calMonth.getFullYear()}
@@ -254,8 +244,8 @@ export function DashboardView() {
       </div>
 
       {/* ══ COLONNE CENTRE ══ */}
-      <div className="flex-1 min-w-0 overflow-y-auto">
-        <div className="px-8 py-6">
+      <div className="order-1 md:order-none flex-1 min-w-0 md:overflow-y-auto">
+        <div className="px-5 sm:px-8 py-5 sm:py-6">
 
           {/* Header */}
           <div className="mb-7">
@@ -430,7 +420,7 @@ export function DashboardView() {
       </div>
 
       {/* ══ COLONNE DROITE ══ */}
-      <div className="w-72 shrink-0 border-l border-[var(--border)] overflow-y-auto">
+      <div className="hidden md:block w-72 shrink-0 border-l border-[var(--border)] overflow-y-auto">
         <div className="p-5 space-y-6">
 
           {/* Profil */}
