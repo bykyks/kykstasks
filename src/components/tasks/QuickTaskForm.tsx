@@ -72,16 +72,15 @@ export function QuickTaskForm({ onClose }: QuickTaskFormProps) {
       {/* Backdrop */}
       <div className="fixed inset-0 bg-black/25" onClick={handleClose} />
 
-      {/* Picker backdrop - closes any open picker */}
-      {openPicker && (
-        <div className="fixed inset-0 z-[55]" onClick={closePicker} />
-      )}
-
       {/* Card */}
       <form
         onSubmit={handleSubmit}
         className="relative z-50 w-full sm:max-w-[520px] bg-[var(--surface)] rounded-t-[20px] sm:rounded-[16px] shadow-2xl border border-[var(--border)] overflow-visible"
       >
+        {/* Picker backdrop — à l'intérieur du form pour rester dans son stacking context */}
+        {openPicker && (
+          <div className="fixed inset-0 z-[55]" onClick={closePicker} />
+        )}
         {/* Drag handle — mobile only */}
         <div className="sm:hidden flex justify-center pt-3 pb-1">
           <div className="w-9 h-1 rounded-full bg-[var(--border)]" />
