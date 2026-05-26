@@ -4,6 +4,7 @@ import { supabase } from './lib/supabase';
 import { useStore } from './store';
 import { AppLayout } from './components/layout/AppLayout';
 import { LoginPage } from './components/auth/LoginPage';
+import { ResetPasswordPage } from './components/auth/ResetPasswordPage';
 import { useTheme } from './hooks/useTheme';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useNotifications } from './hooks/useNotifications';
@@ -29,11 +30,13 @@ const Spinner = () => (
 
 export default function App() {
   const [session, setSession] = useState<Session | null | undefined>(undefined);
+  const [resetMode, setResetMode] = useState(false);
   const { loadAll, isLoading } = useStore();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session));
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, sess) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, sess) => {
+      if (event === 'PASSWORD_RECOVERY') setResetMode(true);
       setSession(sess);
     });
     return () => subscription.unsubscribe();
@@ -48,6 +51,9 @@ export default function App() {
 
   // Not logged in
   if (!session) return <LoginPage />;
+
+  // Password reset flow
+  if (resetMode) return <ResetPasswordPage onDone={() => setResetMode(false)} />;
 
   // Loading data
   if (isLoading) {
