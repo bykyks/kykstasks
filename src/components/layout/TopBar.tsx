@@ -1,45 +1,6 @@
 import React from 'react';
-import { Search, Plus, Sun, Moon, Monitor, Menu, PanelLeft } from 'lucide-react';
+import { Search, Menu, PanelLeft } from 'lucide-react';
 import { useStore } from '../../store';
-import { Button } from '../ui/Button';
-import type { View, Theme } from '../../types';
-
-const VIEW_LABELS: Record<string, string> = {
-  dashboard: 'Accueil',
-  today: "Aujourd'hui",
-  upcoming: 'À venir',
-  all: 'Tâches',
-  search: 'Recherche',
-  kanban: 'Tableau',
-  stats: 'Statistiques',
-};
-
-function viewLabel(view: View): string {
-  if (typeof view === 'string') return VIEW_LABELS[view] ?? view;
-  return '';
-}
-
-function ThemeToggle() {
-  const settings = useStore((s) => s.settings);
-  const saveSettings = useStore((s) => s.saveSettings);
-  if (!settings) return null;
-
-  const cycle = () => {
-    const order: Theme[] = ['light', 'dark', 'system'];
-    const next = order[(order.indexOf(settings.theme) + 1) % 3];
-    saveSettings({ ...settings, theme: next });
-  };
-
-  const Icon =
-    settings.theme === 'light' ? Sun :
-    settings.theme === 'dark' ? Moon : Monitor;
-
-  return (
-    <Button variant="ghost" size="icon" onClick={cycle} title={`Thème : ${settings.theme}`}>
-      <Icon size={15} />
-    </Button>
-  );
-}
 
 interface TopBarProps {
   onMenuToggle?: () => void;
@@ -47,35 +8,30 @@ interface TopBarProps {
 }
 
 export function TopBar({ onMenuToggle, onToggleSidebar }: TopBarProps) {
-  const { activeView, searchQuery, setSearchQuery, setView, openTaskForm } = useStore();
+  const { searchQuery, setSearchQuery, setView } = useStore();
 
   return (
-    <header className="flex items-center gap-3 px-5 md:px-8 h-14 border-b border-[var(--border)] shrink-0 bg-[var(--surface)]">
+    <header className="flex items-center gap-2 px-5 md:px-4 h-12 border-b border-[var(--border)] shrink-0 bg-[var(--surface)]">
       {/* Hamburger - mobile only */}
       <button
         className="md:hidden p-2 rounded-[9px] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] transition-colors"
         onClick={onMenuToggle}
         aria-label="Menu"
       >
-        <Menu size={20} />
+        <Menu size={18} />
       </button>
 
       {/* Sidebar toggle - desktop only */}
       {onToggleSidebar && (
         <button
-          className="hidden md:flex p-2 rounded-[9px] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] transition-colors"
+          className="hidden md:flex p-1.5 rounded-[9px] text-[var(--text-muted)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-secondary)] transition-colors"
           onClick={onToggleSidebar}
           aria-label="Réduire/développer le menu"
           title="Réduire/développer le menu"
         >
-          <PanelLeft size={17} />
+          <PanelLeft size={15} />
         </button>
       )}
-
-      {/* Title */}
-      <h1 className="text-[17px] font-bold text-[var(--text-primary)] min-w-0 truncate tracking-[-0.4px]">
-        {viewLabel(activeView)}
-      </h1>
 
       <div className="flex-1" />
 
@@ -101,17 +57,6 @@ export function TopBar({ onMenuToggle, onToggleSidebar }: TopBarProps) {
         <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[11px] text-[var(--text-muted)] bg-[var(--border)] rounded px-[5px] py-px pointer-events-none">/</span>
       </div>
 
-      <ThemeToggle />
-
-      <Button
-        variant="primary"
-        size="md"
-        onClick={() => openTaskForm()}
-        className="rounded-[9px] text-[13px] font-semibold"
-      >
-        <Plus size={15} />
-        <span className="hidden sm:inline">Nouvelle tâche</span>
-      </Button>
     </header>
   );
 }

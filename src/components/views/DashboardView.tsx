@@ -284,7 +284,7 @@ export function DashboardView() {
           {centerTasks.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-24 text-center">
               <p className="text-lg font-semibold text-[var(--text-muted)]">
-                {isViewingToday ? 'Tout est à jour ! 🎉' : 'Aucune tâche ce jour'}
+                {isViewingToday ? 'Tout est à jour !' : 'Aucune tâche ce jour'}
               </p>
               <button
                 onClick={() => openTaskForm()}
@@ -295,9 +295,8 @@ export function DashboardView() {
               </button>
             </div>
           ) : (
-            <div className="space-y-3 max-w-xl">
-              {centerTasks.map((task, i) => {
-                const isAmber = i < 2;
+            <div className="space-y-2 max-w-xl">
+              {centerTasks.map((task) => {
                 const isLate = !isToday(task.due_date) && isOverdue(task.due_date);
                 const priority = PRIORITY_CONFIG[task.priority];
                 const doneCount = task.subtasks.filter((s) => s.completed).length;
@@ -307,98 +306,76 @@ export function DashboardView() {
                   <div
                     key={task.id}
                     onClick={() => selectTask(task.id)}
-                    className={cn(
-                      'rounded-2xl px-5 py-4 cursor-pointer transition-all duration-150 select-none',
-                      isAmber
-                        ? 'bg-[var(--accent)] hover:bg-[var(--accent-hover)] shadow-md'
-                        : 'bg-[var(--surface)] border-2 border-[var(--border)] hover:border-[var(--accent)]/30 hover:shadow-sm',
-                    )}
+                    className="rounded-xl px-4 py-3 cursor-pointer transition-all duration-150 select-none
+                               bg-[var(--surface)] border border-[var(--border)]
+                               hover:border-[var(--accent)]/30 hover:shadow-sm"
                   >
-                    <div className="flex items-start gap-4">
+                    <div className="flex items-start gap-3">
 
                       {/* Checkbox */}
                       <button
                         onClick={(e) => { e.stopPropagation(); toggleTask(task.id); }}
-                        className={cn(
-                          'mt-0.5 shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all',
-                          isAmber
-                            ? 'border-white/60 hover:border-white hover:bg-white/20'
-                            : 'border-[var(--border)] hover:border-[var(--accent)] hover:bg-[var(--surface-active)]',
-                        )}
+                        className="mt-0.5 shrink-0 w-5 h-5 rounded-full border-2 border-[var(--border)]
+                                   flex items-center justify-center transition-all
+                                   hover:border-[var(--accent)] hover:bg-[var(--surface-active)]"
                       >
                         {task.completed && (
-                          <Check size={12} color={isAmber ? 'white' : 'var(--accent)'} strokeWidth={3} />
+                          <Check size={10} color="var(--accent)" strokeWidth={3} />
                         )}
                       </button>
 
                       {/* Contenu */}
                       <div className="flex-1 min-w-0">
                         <p className={cn(
-                          'font-bold leading-snug',
-                          isAmber
-                            ? 'text-white text-base'
-                            : isLate
-                              ? 'text-red-500 text-sm'
-                              : 'text-[var(--text-primary)] text-sm',
+                          'text-sm font-semibold leading-snug',
+                          isLate ? 'text-red-500' : 'text-[var(--text-primary)]',
                         )}>
                           {task.title}
                         </p>
 
-                        {/* Notes (cards blanches uniquement) */}
-                        {!isAmber && notes && (
-                          <p className="text-xs text-[var(--text-muted)] mt-1 line-clamp-1 leading-relaxed">
+                        {notes && (
+                          <p className="text-xs text-[var(--text-muted)] mt-0.5 line-clamp-1 leading-relaxed">
                             {notes}
                           </p>
                         )}
 
-                        {/* Sous-tâches */}
                         {task.subtasks.length > 0 && (
-                          <div className="mt-2 space-y-1">
-                            {task.subtasks.slice(0, 3).map((sub) => (
+                          <div className="mt-1.5 space-y-0.5">
+                            {task.subtasks.slice(0, 2).map((sub) => (
                               <div key={sub.id} className="flex items-center gap-2">
+                                <span className="w-1 h-1 rounded-full shrink-0 bg-[var(--text-muted)]" />
                                 <span className={cn(
-                                  'w-1 h-1 rounded-full shrink-0',
-                                  isAmber ? 'bg-white/50' : 'bg-[var(--text-muted)]',
-                                )} />
-                                <span className={cn(
-                                  'text-xs truncate',
+                                  'text-xs truncate text-[var(--text-secondary)]',
                                   sub.completed ? 'line-through opacity-40' : '',
-                                  isAmber ? 'text-white/75' : 'text-[var(--text-secondary)]',
                                 )}>
                                   {sub.title}
                                 </span>
                               </div>
                             ))}
-                            {task.subtasks.length > 3 && (
-                              <p className={cn('text-xs', isAmber ? 'text-white/50' : 'text-[var(--text-muted)]')}>
-                                +{task.subtasks.length - 3} autres · {doneCount}/{task.subtasks.length}
+                            {task.subtasks.length > 2 && (
+                              <p className="text-xs text-[var(--text-muted)]">
+                                +{task.subtasks.length - 2} autres · {doneCount}/{task.subtasks.length}
                               </p>
                             )}
                           </div>
                         )}
 
-                        {/* Badge priorité + retard (cards blanches) */}
-                        {!isAmber && (
-                          <div className="flex items-center gap-2 mt-2">
-                            <span
-                              className="text-xs font-semibold px-2 py-0.5 rounded-full"
-                              style={{ color: priority.color, backgroundColor: priority.bgColor }}
-                            >
-                              {priority.label}
-                            </span>
-                            {isLate && (
-                              <span className="text-xs font-semibold text-red-500">En retard</span>
-                            )}
-                          </div>
-                        )}
+                        <div className="flex items-center gap-2 mt-1.5">
+                          <span
+                            className="text-[11px] font-semibold px-1.5 py-0.5 rounded-full"
+                            style={{ color: priority.color, backgroundColor: priority.bgColor }}
+                          >
+                            {priority.label}
+                          </span>
+                          {isLate && (
+                            <span className="text-[11px] font-semibold text-red-500">En retard</span>
+                          )}
+                        </div>
                       </div>
 
                       {/* Heure */}
                       {task.due_time && (
-                        <span className={cn(
-                          'text-sm font-bold shrink-0 mt-0.5',
-                          isAmber ? 'text-white/90' : 'text-[var(--text-secondary)]',
-                        )}>
+                        <span className="text-xs font-semibold shrink-0 mt-0.5 text-[var(--text-muted)]">
                           {task.due_time.slice(0, 5)}
                         </span>
                       )}

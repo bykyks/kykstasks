@@ -81,8 +81,8 @@ export function TaskItem({ task, draggable = false, variant = 'row', dimmed = fa
     return (
       <div
         ref={setNodeRef}
-        style={style}
-        className="border-b border-[var(--border)] py-[10px] min-h-[48px] opacity-40"
+        style={{ ...style, borderLeftColor: priority.color }}
+        className="border-l-[2.5px] pl-3 rounded-[8px] py-[9px] min-h-[48px] opacity-30"
       />
     );
   }
@@ -180,15 +180,15 @@ export function TaskItem({ task, draggable = false, variant = 'row', dimmed = fa
       exit={{ opacity: 0, height: 0, overflow: 'hidden' }}
       onClick={() => !editingTitle && selectTask(isSelected ? null : task.id)}
       className={cn(
-        'group flex items-center gap-3 py-[10px] select-none cursor-pointer',
-        'transition-colors duration-150',
+        'group flex items-center gap-3 pl-3 pr-2 py-[9px] select-none cursor-pointer',
+        'rounded-[8px] border-l-[2.5px] transition-all duration-150',
         draggable && 'task-draggable',
         isSelected
-          ? 'bg-[var(--surface-active)]/50 rounded-lg px-2 -mx-2'
-          : 'hover:bg-[var(--bg)] rounded-lg px-2 -mx-2',
+          ? 'bg-[var(--surface-active)]/60 shadow-sm'
+          : 'hover:bg-[var(--surface-hover)] hover:shadow-sm',
         task.completed && 'opacity-[0.42]',
       )}
-      style={style}
+      style={{ ...style, borderLeftColor: priority.color }}
     >
       {/* Checkbox */}
       <motion.button

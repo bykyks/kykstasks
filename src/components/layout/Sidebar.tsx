@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   Sun, Calendar, List, KanbanSquare, Tag, Plus, Settings,
-  ChevronDown, ChevronRight, Trash2, Pencil, LayoutDashboard, BarChart2,
+  ChevronDown, ChevronRight, Trash2, Pencil, BarChart2,
 } from 'lucide-react';
 import { useStore } from '../../store';
 import type { View } from '../../types';
@@ -50,19 +50,17 @@ function NavItem({ icon, label, view, badge, onClose, collapsed }: NavItemProps)
     <button
       onClick={() => { setView(view); onClose?.(); }}
       className={cn(
-        'w-full flex items-center gap-2.5 px-[11px] py-2 rounded-[9px] text-[13.5px] font-medium transition-all duration-150',
+        'w-full flex items-center gap-2.5 py-[7px] rounded-[9px] text-[13.5px] font-medium transition-all duration-150',
+        'border-l-[2px] pl-[9px] pr-[9px]',
         isActive
-          ? 'bg-[var(--accent)] text-white'
-          : 'text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]',
+          ? 'bg-[var(--surface-active)] text-[var(--accent)] border-[var(--accent)]'
+          : 'text-[var(--text-secondary)] border-transparent hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]',
       )}
     >
       <span className="shrink-0">{icon}</span>
       <span className="flex-1 text-left truncate tracking-[-0.1px]">{label}</span>
       {badge !== undefined && badge > 0 && (
-        <span className={cn(
-          'text-[11px] rounded-full min-w-[20px] h-[18px] flex items-center justify-center px-1.5 font-bold',
-          isActive ? 'bg-white/25 text-white' : 'bg-[var(--accent)]/15 text-[var(--accent)]',
-        )}>
+        <span className="text-[11px] rounded-full min-w-[20px] h-[18px] flex items-center justify-center px-1.5 font-bold bg-[var(--accent)]/15 text-[var(--accent)]">
           {badge > 99 ? '99+' : badge}
         </span>
       )}
@@ -147,7 +145,6 @@ export function Sidebar({ isOpen = false, onClose, collapsed = false, onToggleCo
       </div>
 
       <nav className="flex-1 overflow-y-auto px-2 py-0 flex flex-col gap-px overflow-x-hidden">
-        <NavItem icon={<LayoutDashboard size={14} />} label="Accueil" view="dashboard" onClose={onClose} collapsed={collapsed} />
         <NavItem icon={<Sun size={14} />} label="Aujourd'hui" view="today" badge={collapsed ? undefined : todayCount} onClose={onClose} collapsed={collapsed} />
         <NavItem icon={<Calendar size={14} />} label="À venir" view="upcoming" onClose={onClose} collapsed={collapsed} />
         <NavItem icon={<List size={14} />} label="Tâches" view="all" onClose={onClose} collapsed={collapsed} />

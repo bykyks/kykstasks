@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { X, Download, Upload, Database, LogOut, Bell, BellOff, BellRing, HardDriveDownload } from 'lucide-react';
+import { X, Download, Upload, Database, LogOut, Bell, BellOff, BellRing, HardDriveDownload, ChevronDown } from 'lucide-react';
 import { useStore } from '../../store';
 import { Button } from '../ui/Button';
 import { supabase } from '../../lib/supabase';
 import type { Settings, Theme } from '../../types';
 import { handleExportJson, handleExportCsv, handleImportJson, hasLocalBackup, restoreLocalBackup } from '../../lib/export';
-import { ensureNotificationPermission, sendDailyDigest } from '../../lib/notifications';
+import { ensureNotificationPermission } from '../../lib/notifications';
 
 export function SettingsPanel() {
   const { settings, saveSettings, toggleSettings, loadAll } = useStore();
@@ -16,9 +16,9 @@ export function SettingsPanel() {
   const [notifPermission, setNotifPermission] = useState<NotificationPermission | 'unsupported'>(
     'Notification' in window ? Notification.permission : 'unsupported',
   );
-  const [digestTesting, setDigestTesting] = useState(false);
   const [localBackupInfo, setLocalBackupInfo] = useState(() => hasLocalBackup());
   const [restoreMsg, setRestoreMsg] = useState('');
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   useEffect(() => setLocal(settings), [settings]);
 
@@ -55,12 +55,6 @@ export function SettingsPanel() {
   const handleEnableNotifications = async () => {
     const granted = await ensureNotificationPermission();
     setNotifPermission(granted ? 'granted' : Notification.permission);
-  };
-
-  const handleTestDigest = async () => {
-    setDigestTesting(true);
-    await sendDailyDigest();
-    setDigestTesting(false);
   };
 
   const handleRestoreBackup = async () => {
@@ -196,138 +190,121 @@ export function SettingsPanel() {
               <span className="text-sm text-[var(--text-primary)]">Résumé quotidien</span>
             </label>
             {local.daily_digest_enabled && (
-              <div className="space-y-2">
-                <div>
-                  <label className="text-sm text-[var(--text-secondary)] block mb-1.5">
-                    Heure du résumé
-                  </label>
-                  <input
-                    type="time"
-                    value={local.daily_digest_time}
-                    onChange={(e) => update({ daily_digest_time: e.target.value })}
-                    className="text-sm bg-[var(--surface-hover)] border border-[var(--border)]
-                               rounded-lg px-3 py-1.5 text-[var(--text-primary)] focus:outline-none"
-                  />
-                </div>
-                <Button
-                  variant="secondary"
-                  className="w-full justify-start gap-2"
-                  onClick={handleTestDigest}
-                  disabled={digestTesting || notifPermission !== 'granted'}
-                >
-                  <Bell size={14} />
-                  {digestTesting ? 'Envoi…' : 'Tester le résumé maintenant'}
-                </Button>
-              </div>
-            )}
-          </section>
-
-          {/* Data */}
-          <section className="space-y-3">
-            <h3 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">
-              Données
-            </h3>
-
-            {/* Auto-backup toggle */}
-            <label className="flex items-center gap-3 cursor-pointer">
-              <div
-                onClick={() => update({ backup_enabled: !local.backup_enabled })}
-                className={`w-10 h-5.5 rounded-full relative transition-colors ${
-                  local.backup_enabled ? 'bg-[var(--accent)]' : 'bg-[var(--border)]'
-                }`}
-              >
-                <span
-                  className={`absolute top-0.5 w-4.5 h-4.5 bg-white rounded-full shadow transition-transform ${
-                    local.backup_enabled ? 'translate-x-5' : 'translate-x-0.5'
-                  }`}
+              <div>
+                <label className="text-sm text-[var(--text-secondary)] block mb-1.5">
+                  Heure du résumé
+                </label>
+                <input
+                  type="time"
+                  value={local.daily_digest_time}
+                  onChange={(e) => update({ daily_digest_time: e.target.value })}
+                  className="text-sm bg-[var(--surface-hover)] border border-[var(--border)]
+                             rounded-lg px-3 py-1.5 text-[var(--text-primary)] focus:outline-none"
                 />
               </div>
-              <span className="text-sm text-[var(--text-primary)]">Sauvegarde locale auto</span>
-            </label>
-            {local.backup_enabled && (
-              <p className="text-xs text-[var(--text-muted)]">
-                Sauvegarde automatique dans votre navigateur après chaque modification.
-                {localBackupInfo && (
-                  <> Dernière : {new Date(localBackupInfo.savedAt).toLocaleString('fr-FR')}.</>
-                )}
-              </p>
             )}
-            {localBackupInfo && (
-              <Button
-                variant="secondary"
-                className="w-full justify-start gap-2"
-                onClick={handleRestoreBackup}
-              >
-                <HardDriveDownload size={14} />
-                Restaurer depuis sauvegarde locale
-              </Button>
-            )}
-            {restoreMsg && (
-              <p className={`text-xs ${restoreMsg.includes('Échec') ? 'text-red-500' : 'text-green-500'}`}>
-                {restoreMsg}
-              </p>
-            )}
-
-            <div className="space-y-2 pt-1">
-              <Button
-                variant="secondary"
-                className="w-full justify-start gap-2"
-                onClick={handleExportJson}
-              >
-                <Download size={14} />
-                Exporter en JSON
-              </Button>
-              <Button
-                variant="secondary"
-                className="w-full justify-start gap-2"
-                onClick={handleExportCsv}
-              >
-                <Database size={14} />
-                Exporter en CSV
-              </Button>
-              <Button
-                variant="secondary"
-                className="w-full justify-start gap-2"
-                onClick={handleImport}
-                disabled={importing}
-              >
-                <Upload size={14} />
-                Importer depuis JSON
-              </Button>
-              {importMsg && (
-                <p className={`text-xs ${importMsg.includes('fail') || importMsg.includes('Échec') ? 'text-red-500' : 'text-green-500'}`}>
-                  {importMsg}
-                </p>
-              )}
-            </div>
           </section>
 
-          {/* Keyboard shortcuts */}
-          <section className="space-y-2">
-            <h3 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">
-              Raccourcis clavier
-            </h3>
-            <div className="space-y-1.5 text-sm">
-              {[
-                ['n', 'Nouvelle tâche'],
-                ['⌘K', 'Ajout rapide'],
-                ['⌘,', 'Paramètres'],
-                ['1', "Vue Aujourd'hui"],
-                ['2', 'Vue À venir'],
-                ['3', 'Toutes les tâches'],
-                ['4', 'Kanban'],
-                ['/', 'Rechercher'],
-                ['Esc', 'Fermer / désélectionner'],
-                ['Del', 'Supprimer la tâche sélectionnée'],
-              ].map(([key, label]) => (
-                <div key={key} className="flex items-center justify-between">
-                  <span className="text-[var(--text-secondary)]">{label}</span>
-                  <kbd className="px-2 py-0.5 rounded bg-[var(--surface-hover)] border border-[var(--border)] font-mono text-xs text-[var(--text-primary)]">
-                    {key}
-                  </kbd>
+          {/* Avancé */}
+          <section>
+            <button
+              onClick={() => setShowAdvanced((v) => !v)}
+              className="w-full flex items-center justify-between text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide hover:text-[var(--text-secondary)] transition-colors"
+            >
+              Avancé
+              <ChevronDown
+                size={13}
+                className={`transition-transform duration-200 ${showAdvanced ? 'rotate-180' : ''}`}
+              />
+            </button>
+
+            {showAdvanced && (
+              <div className="mt-4 space-y-4">
+                {/* Backup */}
+                <div className="space-y-2">
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <div
+                      onClick={() => update({ backup_enabled: !local.backup_enabled })}
+                      className={`w-10 h-5.5 rounded-full relative transition-colors ${
+                        local.backup_enabled ? 'bg-[var(--accent)]' : 'bg-[var(--border)]'
+                      }`}
+                    >
+                      <span
+                        className={`absolute top-0.5 w-4.5 h-4.5 bg-white rounded-full shadow transition-transform ${
+                          local.backup_enabled ? 'translate-x-5' : 'translate-x-0.5'
+                        }`}
+                      />
+                    </div>
+                    <span className="text-sm text-[var(--text-primary)]">Sauvegarde locale auto</span>
+                  </label>
+                  {local.backup_enabled && localBackupInfo && (
+                    <p className="text-xs text-[var(--text-muted)]">
+                      Dernière : {new Date(localBackupInfo.savedAt).toLocaleString('fr-FR')}.
+                    </p>
+                  )}
+                  {localBackupInfo && (
+                    <Button
+                      variant="secondary"
+                      className="w-full justify-start gap-2"
+                      onClick={handleRestoreBackup}
+                    >
+                      <HardDriveDownload size={14} />
+                      Restaurer depuis sauvegarde locale
+                    </Button>
+                  )}
+                  {restoreMsg && (
+                    <p className={`text-xs ${restoreMsg.includes('Échec') ? 'text-red-500' : 'text-green-500'}`}>
+                      {restoreMsg}
+                    </p>
+                  )}
                 </div>
-              ))}
-            </div>
+
+                {/* Export / Import */}
+                <div className="space-y-2">
+                  <Button variant="secondary" className="w-full justify-start gap-2" onClick={handleExportJson}>
+                    <Download size={14} />
+                    Exporter en JSON
+                  </Button>
+                  <Button variant="secondary" className="w-full justify-start gap-2" onClick={handleExportCsv}>
+                    <Database size={14} />
+                    Exporter en CSV
+                  </Button>
+                  <Button variant="secondary" className="w-full justify-start gap-2" onClick={handleImport} disabled={importing}>
+                    <Upload size={14} />
+                    Importer depuis JSON
+                  </Button>
+                  {importMsg && (
+                    <p className={`text-xs ${importMsg.includes('Échec') ? 'text-red-500' : 'text-green-500'}`}>
+                      {importMsg}
+                    </p>
+                  )}
+                </div>
+
+                {/* Raccourcis */}
+                <div className="space-y-1.5">
+                  <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide mb-2">Raccourcis clavier</p>
+                  {[
+                    ['n', 'Nouvelle tâche'],
+                    ['⌘K', 'Ajout rapide'],
+                    ['⌘,', 'Paramètres'],
+                    ['1', "Vue Aujourd'hui"],
+                    ['2', 'Vue À venir'],
+                    ['3', 'Toutes les tâches'],
+                    ['4', 'Kanban'],
+                    ['/', 'Rechercher'],
+                    ['Esc', 'Fermer / désélectionner'],
+                    ['Del', 'Supprimer la tâche sélectionnée'],
+                  ].map(([key, label]) => (
+                    <div key={key} className="flex items-center justify-between text-sm">
+                      <span className="text-[var(--text-secondary)]">{label}</span>
+                      <kbd className="px-2 py-0.5 rounded bg-[var(--surface-hover)] border border-[var(--border)] font-mono text-xs text-[var(--text-primary)]">
+                        {key}
+                      </kbd>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </section>
 
           {/* Account */}
