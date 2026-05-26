@@ -42,7 +42,12 @@ export function TaskItem({ task, draggable = false, variant = 'row', dimmed = fa
   };
 
   const taskTags = tags.filter((t) => task.tags.includes(t.id));
+  const project = projects.find((p) => p.id === task.project_id);
   const doneSubtasks = task.subtasks.filter((s) => s.completed).length;
+  const isSoon = task.due_date && !overdue && !task.completed && (() => {
+    const diff = new Date(task.due_date + 'T00:00:00').getTime() - new Date().setHours(0, 0, 0, 0);
+    return diff >= 0 && diff <= 86400000;
+  })();
 
   const handleComplete = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -244,11 +249,17 @@ export function TaskItem({ task, draggable = false, variant = 'row', dimmed = fa
           {task.due_date && (
             <span className={cn(
               'flex items-center gap-1 text-[11.5px] font-medium',
-              overdue ? 'text-red-500' : 'text-[var(--text-muted)]',
+              overdue ? 'text-red-500' : isSoon ? 'text-[var(--accent)]' : 'text-[var(--text-muted)]',
             )}>
               <Calendar size={11} />
               {formatDate(task.due_date)}
               {task.due_time && ` · ${task.due_time}`}
+            </span>
+          )}
+          {project && (
+            <span className="flex items-center gap-1 text-[11.5px] font-medium text-[var(--text-muted)]">
+              <span className="w-[5px] h-[5px] rounded-full shrink-0" style={{ backgroundColor: project.color }} />
+              {project.name}
             </span>
           )}
           {task.recurrence !== 'none' && (

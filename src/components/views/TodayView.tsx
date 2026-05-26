@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { List, LayoutGrid } from 'lucide-react';
+import { List, LayoutGrid, Sun, Plus } from 'lucide-react';
 import { useStore } from '../../store';
 import { TaskList } from '../tasks/TaskList';
 import { isOverdue, isToday } from '../../lib/utils';
@@ -20,6 +20,7 @@ function SectionLabel({ color, label }: { color: string; label: string }) {
 
 export function TodayView() {
   const tasks = useStore((s) => s.tasks);
+  const openTaskForm = useStore((s) => s.openTaskForm);
   const [sort, setSort] = useState<SortKey>('default');
   const [viewMode, setViewMode] = useState<'list' | 'cards'>(() =>
     (localStorage.getItem('view-mode-today') ?? 'list') as 'list' | 'cards',
@@ -108,31 +109,50 @@ export function TodayView() {
         </div>
       </div>
 
-      {overdue.length > 0 && (
-        <section className="mb-8">
-          <SectionLabel color="#EF4444" label={`En retard · ${overdue.length}`} />
-          <TaskList tasks={overdue} draggable={sort === 'default'} variant={variant} />
-        </section>
-      )}
+      {overdue.length === 0 && today.length === 0 && completed.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-24 text-center">
+          <div className="w-14 h-14 rounded-2xl bg-[var(--surface-active)] flex items-center justify-center mb-4">
+            <Sun size={22} className="text-[var(--accent)]" />
+          </div>
+          <p className="text-[15px] font-semibold text-[var(--text-primary)]">Tout est à jour !</p>
+          <p className="text-[13px] text-[var(--text-muted)] mt-1.5">Aucune tâche prévue aujourd'hui.</p>
+          <button
+            onClick={() => openTaskForm()}
+            className="mt-5 flex items-center gap-1.5 px-4 py-2 rounded-[9px] text-[13px] font-semibold bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] transition-colors"
+          >
+            <Plus size={14} />
+            Ajouter une tâche
+          </button>
+        </div>
+      ) : (
+        <>
+          {overdue.length > 0 && (
+            <section className="mb-8">
+              <SectionLabel color="#EF4444" label={`En retard · ${overdue.length}`} />
+              <TaskList tasks={overdue} draggable={sort === 'default'} variant={variant} />
+            </section>
+          )}
 
-      <section className="mb-8">
-        <SectionLabel
-          color="var(--accent)"
-          label={`À faire${today.length > 0 ? ` · ${today.length}` : ''}`}
-        />
-        <TaskList
-          tasks={today}
-          draggable={sort === 'default'}
-          emptyMessage={overdue.length === 0 ? "Tout est à jour ! 🎉" : "Aucune tâche pour aujourd'hui"}
-          variant={variant}
-        />
-      </section>
+          <section className="mb-8">
+            <SectionLabel
+              color="var(--accent)"
+              label={`À faire${today.length > 0 ? ` · ${today.length}` : ''}`}
+            />
+            <TaskList
+              tasks={today}
+              draggable={sort === 'default'}
+              emptyMessage="Aucune tâche pour aujourd'hui"
+              variant={variant}
+            />
+          </section>
 
-      {completed.length > 0 && (
-        <section>
-          <SectionLabel color="var(--text-muted)" label={`Terminées · ${completed.length}`} />
-          <TaskList tasks={completed} draggable={false} variant={variant} />
-        </section>
+          {completed.length > 0 && (
+            <section>
+              <SectionLabel color="var(--text-muted)" label={`Terminées · ${completed.length}`} />
+              <TaskList tasks={completed} draggable={false} variant={variant} />
+            </section>
+          )}
+        </>
       )}
     </div>
   );

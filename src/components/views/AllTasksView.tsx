@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { List, LayoutGrid } from 'lucide-react';
+import { List, LayoutGrid, CheckSquare, Plus } from 'lucide-react';
 import { useStore } from '../../store';
 import { TaskList } from '../tasks/TaskList';
 import type { Priority } from '../../types';
@@ -16,6 +16,7 @@ const SORT_LABELS: Record<SortKey, string> = {
 
 export function AllTasksView() {
   const tasks = useStore((s) => s.tasks);
+  const openTaskForm = useStore((s) => s.openTaskForm);
   const [status, setStatus] = useState<'all' | 'completed'>('all');
   const [priorityFilter, setPriorityFilter] = useState<Priority | null>(null);
   const [sort, setSort] = useState<SortKey>('default');
@@ -139,12 +140,34 @@ export function AllTasksView() {
         ))}
       </div>
 
-      <TaskList
-        tasks={filtered}
-        draggable={status === 'all' && priorityFilter === null && sort === 'default'}
-        emptyMessage={status === 'completed' ? 'Aucune tâche terminée' : 'Aucune tâche avec ce filtre'}
-        variant={variant}
-      />
+      {filtered.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-24 text-center">
+          <div className="w-14 h-14 rounded-2xl bg-[var(--surface-active)] flex items-center justify-center mb-4">
+            <CheckSquare size={22} className="text-[var(--accent)]" />
+          </div>
+          <p className="text-[15px] font-semibold text-[var(--text-primary)]">
+            {status === 'completed' ? 'Aucune tâche terminée' : priorityFilter ? 'Aucune tâche avec ce filtre' : 'Aucune tâche'}
+          </p>
+          <p className="text-[13px] text-[var(--text-muted)] mt-1.5">
+            {status === 'completed' ? 'Complète une tâche pour la voir ici.' : priorityFilter ? 'Essaie un autre filtre.' : 'Commence par créer ta première tâche.'}
+          </p>
+          {status === 'all' && !priorityFilter && (
+            <button
+              onClick={() => openTaskForm()}
+              className="mt-5 flex items-center gap-1.5 px-4 py-2 rounded-[9px] text-[13px] font-semibold bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] transition-colors"
+            >
+              <Plus size={14} />
+              Créer une tâche
+            </button>
+          )}
+        </div>
+      ) : (
+        <TaskList
+          tasks={filtered}
+          draggable={status === 'all' && priorityFilter === null && sort === 'default'}
+          variant={variant}
+        />
+      )}
     </div>
   );
 }

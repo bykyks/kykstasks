@@ -107,7 +107,7 @@ export function Sidebar({ isOpen = false, onClose, collapsed = false, onToggleCo
 
       {/* App brand */}
       <div className={cn('pt-[22px] pb-4', collapsed ? 'px-2' : 'px-[18px]')}>
-        <div className={cn('flex items-center', collapsed ? 'justify-center' : 'gap-2.5')}>
+        <div className={cn('flex items-center group', collapsed ? 'justify-center' : 'gap-2.5')}>
           <div className="w-[30px] h-[30px] rounded-[9px] shrink-0 flex items-center justify-center" style={{ backgroundColor: '#d78a27' }}>
             <img src="/icon.png" alt="Logo" className="w-[22px] h-[22px] object-contain" />
           </div>

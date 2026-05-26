@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
 import { useStore } from '../../store';
@@ -19,19 +20,34 @@ import { QuickAdd } from '../ui/QuickAdd';
 
 function MainContent() {
   const activeView = useStore((s) => s.activeView);
+  const viewKey = typeof activeView === 'string' ? activeView : `${(activeView as { type: string; id: string }).type}-${(activeView as { type: string; id: string }).id}`;
 
-  if (activeView === 'dashboard') return <DashboardView />;
-  if (activeView === 'today') return <TodayView />;
-  if (activeView === 'upcoming') return <UpcomingView />;
-  if (activeView === 'all') return <AllTasksView />;
-  if (activeView === 'search') return <SearchView />;
-  if (activeView === 'kanban') return <KanbanView />;
-  if (activeView === 'stats') return <StatsView />;
-  if (typeof activeView === 'object' && activeView.type === 'project')
-    return <ProjectView id={activeView.id} />;
-  if (typeof activeView === 'object' && activeView.type === 'tag')
-    return <TagView id={activeView.id} />;
-  return null;
+  let content: React.ReactNode = null;
+  if (activeView === 'dashboard') content = <DashboardView />;
+  else if (activeView === 'today') content = <TodayView />;
+  else if (activeView === 'upcoming') content = <UpcomingView />;
+  else if (activeView === 'all') content = <AllTasksView />;
+  else if (activeView === 'search') content = <SearchView />;
+  else if (activeView === 'kanban') content = <KanbanView />;
+  else if (activeView === 'stats') content = <StatsView />;
+  else if (typeof activeView === 'object' && activeView.type === 'project')
+    content = <ProjectView id={(activeView as { type: string; id: string }).id} />;
+  else if (typeof activeView === 'object' && activeView.type === 'tag')
+    content = <TagView id={(activeView as { type: string; id: string }).id} />;
+
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={viewKey}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1, transition: { duration: 0.14 } }}
+        exit={{ opacity: 0, transition: { duration: 0.08 } }}
+        className="h-full"
+      >
+        {content}
+      </motion.div>
+    </AnimatePresence>
+  );
 }
 
 export function AppLayout() {
